@@ -14,6 +14,7 @@ import {
   TextInput,
   FlatList,
   Alert,
+  RefreshControl,
 } from 'react-native';
 
 import { GetQueryResult } from '../components/WebAPI';
@@ -36,11 +37,12 @@ class MyListItem extends React.PureComponent {
   };
 
   render() {
+
     let data = this.props.data;
-    let photo = this.GetFotoURL(data.foto);
+    let photo = this.GetFotoURL(data.sender.foto);
     return (
       <TouchableOpacity
-        style = {{borderWidth:0.5, borderColor: '#C4C4C4', padding: 8, margin:8}}
+        style = {{borderWidth:0.5, borderColor: '#E5E5E5', padding: 8, margin:8, marginBottom: 0}}
         onPress={this._onPress}>
         <View style={{flexDirection: 'row'}}>
           <View style={{width: '30%', alignItems: 'center', padding: 8}}>
@@ -50,7 +52,13 @@ class MyListItem extends React.PureComponent {
               </View>
             </ImageBackground>
           </View>
-          <Text style={{color: '#D21C43', width: '70%'}}>{data.name}</Text>
+          <View style={{width: '70%'}}>
+            <View style={{flexDirection: 'row'}}>
+              <Text style={{width: '70%', color: '#D21C43',  fontWeight: 'bold'}}>{data.sender.name}</Text>
+              <Text style={{width: '30%', fontSize: 8}}>{data.lastMessage.date}</Text>
+            </View>
+            <Text style={{color: 'grey'}}>{data.lastMessage.text}</Text>
+          </View>
         </View>
       </TouchableOpacity>
     );
@@ -75,11 +83,11 @@ export class MessagesScreen extends React.Component {
   constructor(props) {
     super(props);
     const { navigation } = this.props;
-    this.state = {data: [], dataIsLoading: false, errors: '', modalVisible: false};
+    this.state = {data: [], refreshing: false, errors: '', modalVisible: false};
   }
 
   componentWillMount() {
-    this.setState({data: [], dataIsLoading: false, errors: '', modalVisible: false});
+    this.setState({data: [], refreshing: false, errors: '', modalVisible: false});
     this._loadAsync();
   }
 
@@ -93,18 +101,20 @@ export class MessagesScreen extends React.Component {
 
   _keyExtractor = (item, index) => item.id;
 
-  _onChangeText = (props) => {this.props.navigation.navigate("Dialog", {id: props.id, name: props.data.name, fotourl: props.data.foto})};
+  _onChangeText = (props) => {this.props.navigation.navigate("Dialog", {id: props.id, recipient: {name: props.data.sender.name, url: props.data.sender.foto}})};
 
   _NewMessageAsync = async () => {this.props.navigation.navigate('CompanyList');}
 
   _loadAsync = async () => {
 
+    this.setState({refreshing: true});
+
     let dataJSON  = await GetQueryResult({method: 'GET', url: DIALOG_LIST_URL});
 
     if (dataJSON['status'] === true) {
-      this.setState({data:  dataJSON['dataset'], dataIsLoading: true});
+      this.setState({data:  dataJSON['dataset'], refreshing: false, text: JSON.stringify(dataJSON)});
     }else{
-      this.setState({errors: dataJSON['errors'], dataIsLoading: true});
+      this.setState({errors: dataJSON['errors'], refreshing: false, text: JSON.stringify(dataJSON)});
     };
   }
 
@@ -125,27 +135,17 @@ export class MessagesScreen extends React.Component {
               extraData={this.state}
               keyExtractor={this._keyExtractor}
               renderItem={this._renderItem}
+              refreshControl={
+                <RefreshControl
+                  refreshing={this.state.refreshing}
+                  onRefresh={this._loadAsync}
+                />
+              }
             />
-            <TouchableOpacity style={styles.fabMenuStyle}
-              onPress={() => {this.setState({dataIsLoading: false,}); this._loadAsync()}}>
-              <Icon
-                reverse
-                size={20}
-                name='md-sync'
-                type='ionicon'
-                color='#D21C43'
-                />
+            <TouchableOpacity onPress={this._NewMessageAsync} style={styles.redSection}>
+              <Text style={{color: 'white', marginRight: 8, marginTop: -4}}>Новое сообщение</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.fabMenuStyle1}
-              onPress={() => {this.setState({dataIsLoading: false,}); this._NewMessageAsync()}}>
-              <Icon
-                reverse
-                size={20}
-                name='md-add-circle-outline'
-                type='ionicon'
-                color='#D21C43'
-                />
-            </TouchableOpacity>
+
           </View>
     );
   }
@@ -223,29 +223,4 @@ const styles = StyleSheet.create({
     borderWidth: 0.3,
     margin: 8,
   },
-
-  fabMenuStyle: {
-    flexDirection: 'row',
-    position: 'absolute',
-    backgroundColor: '#D21C43',
-    borderRadius: 50,
-    borderColor: 'black',
-    borderWidth: 0.5,
-    bottom: 8,
-    right: 8,
-    justifyContent: 'flex-end'
-  },
-
-  fabMenuStyle1: {
-    flexDirection: 'row',
-    position: 'absolute',
-    backgroundColor: '#D21C43',
-    borderRadius: 50,
-    borderColor: 'black',
-    borderWidth: 0.5,
-    bottom: 68,
-    right: 8,
-    justifyContent: 'flex-end'
-  }
-
 });

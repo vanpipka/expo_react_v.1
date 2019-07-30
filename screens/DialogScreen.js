@@ -14,6 +14,8 @@ import {
   TextInput,
   FlatList,
   Alert,
+  RefreshControl,
+  Image
 } from 'react-native';
 
 import { GetQueryResult } from '../components/WebAPI';
@@ -25,15 +27,32 @@ import Urls from '../constants/Urls';
 
 import { createStackNavigator, createSwitchNavigator, createAppContainer } from 'react-navigation';
 
-const API       = Urls.SERVER_URL+Urls.MESSAGES_LIST_URL;
+const API       = Urls.SERVER_URL+Urls.DIALOG_LIST_URL+'?id=';
 const API_SAVE  = Urls.SERVER_URL+Urls.MESSAGE_SEND_URL;
+
+class LogoTitle extends React.Component {
+
+  render() {
+    return (
+      <View style={{flexDirection: 'row'}}>
+        <Image
+          source={{uri: this.props.recipient.url}}
+          style={{ width: 30, height: 30 }}
+        />
+        <Text style={{ fontWeight: 'bold', fontSize: 20 }}>
+          {this.props.recipient.name}
+        </Text>
+      </View>
+    );
+  }
+}
 
 class MyListItem extends React.PureComponent {
 
   render() {
     let data = this.props.data;
     return (
-      <View style={{borderWidth:0.5, borderColor: '#C4C4C4', padding: 8, margin:8}}>
+      <View style={{borderWidth:0.5, borderColor: '#E5E5E5', padding: 8, margin:8}}>
         <View style={{flexDirection: 'row'}}>
           <View>
             <View style={{flexDirection: 'row'}}>
@@ -51,9 +70,14 @@ class MyListItem extends React.PureComponent {
 
 export default class MessagesScreen extends React.Component {
 
-  static navigationOptions = {
-    title: 'Сообщения',
+  static navigationOptions = ({ navigation, navigationOptions }) => {
+    const { params } = navigation.state;
+    return {
+          headerTitle: <LogoTitle recipient = {params.recipient}/>
+        };
   };
+
+      /* render function, etc */
 
   constructor(props) {
     super(props);
@@ -64,33 +88,38 @@ export default class MessagesScreen extends React.Component {
     const name = navigation.getParam('name', '');
     const fotourl = navigation.getParam('fotourl', '');
 
-    this.state = {data: [],
-                  dataIsLoading: false,
-                  errors: [],
-                  id: id,
-                  name: name,
-                  fotourl: fotourl,
-                  message: ''};
+    this.state = {data: [], refreshing: false, errors: [], id: id};
+  }
 
-    this._loadCityAsync();
+  componentWillMount() {
+    this._loadAsync();
   }
 
   _keyExtractor = (item, index) => item.id;
 
-  _loadCityAsync = async () => {
+  _loadAsync = async () => {
 
-      let body = encodeURIComponent('csrfmiddlewaretoken') + '=' + await AsyncStorage.getItem('csrfmiddlewaretoken')
-            +"&"+ encodeURIComponent('data') + '=' + JSON.stringify({id: this.state.id});
+      this.setState({refreshing: true});
 
-      let dataJSON  = await GetQueryResult({method: 'POST', url: API, body: body});
+      let dataJSON  = await GetQueryResult({method: 'GET', url: API+this.state.id});
 
-      if (dataJSON['status'] === true) {
+      this.setState({refreshing: false, text: JSON.stringify(dataJSON)});
 
-        this.setState({data:  dataJSON['dataset'], dataIsLoading: true});
-      }
-      else{
-        this.setState({errors: dataJSON['errors'], dataIsLoading: true});
-      }
+      //if (dataJSON['status'] === true) {
+      //  this.setState({data:  dataJSON['dataset'], refreshing: false, text: JSON.stringify(dataJSON)});
+      //}else{
+      //  this.setState({errors: dataJSON['errors'], refreshing: false, text: JSON.stringify(dataJSON)});
+      //};
+
+      //let dataJSON  = await GetQueryResult({method: 'POST', url: API, body: body});
+
+      //if (dataJSON['status'] === true) {
+
+      //  this.setState({data:  dataJSON['dataset'], refreshing: true});
+      //}
+      //else{
+      //  this.setState({errors: dataJSON['errors'], refreshing: true});
+      //}
 
   }
 
@@ -184,10 +213,6 @@ export default class MessagesScreen extends React.Component {
 
   render() {
 
-    if (!this.state.dataIsLoading) {
-      return (<LoadingPage/>);
-    }
-
     //const { goBack } = this.props.navigation;
     const { navigation } = this.props;
 
@@ -195,29 +220,21 @@ export default class MessagesScreen extends React.Component {
     /*            */
     return (
           <View style={styles.container}>
-            <View style={{flexDirection: 'row', backgroundColor: '#C4C4C4', padding:8, alignItems: 'center'}}>
-              <ImageBackground style={{width: 40,}} source={photo} resizeMode='contain'>
-                <View style={{width: 40, height: 40}}>
-                </View>
-              </ImageBackground>
-              <Text style={{marginLeft: 8}}>{this.state.name}</Text>
-            </View>
+            <Text multiline={true}>
+                {this.state.text}
+            </Text>
             <FlatList
               data={this.state.data}
               extraData={this.state}
               keyExtractor={this._keyExtractor}
               renderItem={this._renderItem}
+              refreshControl={
+                <RefreshControl
+                  refreshing={this.state.refreshing}
+                  onRefresh={this._loadAsync}
+                />
+              }
             />
-            <TouchableOpacity style={styles.fabMenuStyle}
-                          onPress={() => {this.setState({dataIsLoading: false,}); this._loadCityAsync()}}>
-                          <Icon
-                            reverse
-                            size={20}
-                            name='md-sync'
-                            type='ionicon'
-                            color='#D21C43'
-                            />
-            </TouchableOpacity>
             <View style = {styles.redSection}>
               <TextInput
                 style={styles.textInput}
