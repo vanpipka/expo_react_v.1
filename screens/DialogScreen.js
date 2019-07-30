@@ -15,7 +15,9 @@ import {
   FlatList,
   Alert,
   RefreshControl,
-  Image
+  Image,
+  KeyboardAvoidingView,
+  SafeAreaView,
 } from 'react-native';
 
 import { GetQueryResult } from '../components/WebAPI';
@@ -27,8 +29,7 @@ import Urls from '../constants/Urls';
 
 import { createStackNavigator, createSwitchNavigator, createAppContainer } from 'react-navigation';
 
-const API       = Urls.SERVER_URL+Urls.DIALOG_LIST_URL+'?id=';
-const API_SAVE  = Urls.SERVER_URL+Urls.MESSAGE_SEND_URL;
+const DIALOG_LIST_URL = Urls.SERVER_URL+Urls.DIALOG_LIST_URL+'?id=';
 
 class LogoTitle extends React.Component {
 
@@ -91,7 +92,7 @@ export default class MessagesScreen extends React.Component {
   _loadAsync = async () => {
 
       this.setState({refreshing: true});
-      let dataJSON  = await GetQueryResult({method: 'GET', url: API+this.state.id});
+      let dataJSON  = await GetQueryResult({method: 'GET', url: DIALOG_LIST_URL+this.state.id});
 
       if (dataJSON['status'] === true) {
         this.setState({data:  dataJSON['messageList'], refreshing: false, text: JSON.stringify(dataJSON)});
@@ -108,73 +109,31 @@ export default class MessagesScreen extends React.Component {
       />
     );
 
-  _saveMessageAsync = async () => {
-      const { navigation } = this.props;
+  _sendMessageAsync = async () => {
 
       if (this.state.message == ''){
         return;
       }
 
-      let headers = {};
+      this.setState({refreshing: true})
 
-      headers["X-Requested-With"] = "XMLHttpRequest";
-      headers["Cookie"] = 'csrftoken='+await AsyncStorage.getItem('csrftoken')+'; '+'sessionid='+await AsyncStorage.getItem('sessionid');
-      headers["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-      headers["Accept-Encoding"] = "gzip, deflate",
-      headers["Accept-Language"] = "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
-      headers["Cache-Control"] =	"max-age=0",
-      headers["Connection"] = "keep-alive",
-      headers["Content-Type"] = "application/x-www-form-urlencoded",
-      headers["Upgrade-Insecure-Requests"] = "1",
-      headers["User-Agent"] = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-      headers["withCredentials"] = true;
-      headers['Cache-Control'] = 'no-cache';
+      let data = JSON.stringify({dialogID: this.state.id, message: this.state.message})
 
       let body = encodeURIComponent('csrfmiddlewaretoken') + '=' + await AsyncStorage.getItem('csrfmiddlewaretoken')
-           +'&'+ encodeURIComponent('data') + '=' + JSON.stringify({resipient_type: '2', resipient_id: this.state.id, theme: '', text: this.state.message});
+           +'&'+ encodeURIComponent('data') + '=' + data;
 
-      let data = '';
-      try {
-        let response = await fetch(API_SAVE, {method: 'POST', body: body, headers: headers});
-        data = await response.text();
-        if (Platform.OS === 'android') {
-          data = data.replace(/\r?\n/g, '').replace(/[\u0080-\uFFFF]/g, '');
-        }
-      } catch (error) {
-          this.setState({dataIsLoading: true});
-          return;
-      }
-
-      let dataJSON = JSON.parse(data);
+      let dataJSON  = await GetQueryResult({method: 'POST', url: DIALOG_LIST_URL, body: body});
 
       if (dataJSON['status'] === true) {
 
         let dataArray = this.state.data;
-
-        dataArray.unshift({id:'', text: this.state.message, theme: '', date: 'только что'})
-
-        this.setState({data:  dataArray, message : ''});
+        dataArray.push({id:'', text: dataJSON.message.text, created: dataJSON.message.created, itsMe: true})
+        this.setState({data:  dataArray, message : '', errors: '', refreshing: false});
       }
       else{
 
-        this.setState({errors: dataJSON['errors'], dataIsLoading: true});
+        this.setState({errors: dataJSON['errors'], refreshing: false});
       }
-
-        /*let servicesArray = [];
-
-        this.state.data.map((item, index) => {
-
-          try {
-              let value = Number(item.price);
-              servicesArray.push({id: item.id, service: item.title, price: value})
-          } catch (e) {
-
-          }
-        });
-
-        navigation.state.params.onGoBack({services: servicesArray});
-        navigation.goBack();*/
-
   }
 
   GetFotoURL(url){
@@ -183,9 +142,7 @@ export default class MessagesScreen extends React.Component {
           return (require('../images/nofoto.png'))
       }
 
-      const API = Urls.SERVER_URL+url;
-
-      return (photoSource = {uri: API})
+      return (photoSource = {uri: Urls.SERVER_URL+url})
   }
 
   render() {
@@ -194,8 +151,16 @@ export default class MessagesScreen extends React.Component {
     const { navigation } = this.props;
 
     let photo = this.GetFotoURL(this.state.fotourl);
+    let errors = null;
+
+    if (this.state.errors != ''){
+        errors = <View style = {{paddingLeft: 8}}>
+                    <Text multiline = {true} style = {{color: 'red'}}>{this.state.errors}</Text>
+                  </View>
+    }
     /*            */
     return (
+        <KeyboardAvoidingView style={{flex: 1}} behavior="padding"  keyboardVerticalOffset={80} enabled>
           <View style={styles.container}>
             <FlatList
               data={this.state.data}
@@ -209,20 +174,22 @@ export default class MessagesScreen extends React.Component {
                 />
               }
             />
-            <View style = {styles.redSection}>
-              <TextInput
-                style={styles.textInput}
-                onChangeText={(message) => this.setState({message})}
-                value={this.state.message}
-                placeholder = 'Введите ссобщение'
-              />
-              <TouchableOpacity
-                style={styles.redButton}
-                onPress={this._saveMessageAsync}>
-                <Text style={{color: 'white'}}>Отправить</Text>
-              </TouchableOpacity>
-            </View>
+            {errors}
+              <View style = {styles.greySection}>
+                <TextInput
+                  style={styles.textInput}
+                  onChangeText={(message) => this.setState({message})}
+                  value={this.state.message}
+                  placeholder = 'Введите ссобщение'
+                />
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={this._sendMessageAsync}>
+                  <Text style={{color: 'grey'}}>Отправить</Text>
+                </TouchableOpacity>
+              </View>
           </View>
+        </KeyboardAvoidingView>
     );
   }
 }
@@ -266,41 +233,27 @@ const styles = StyleSheet.create({
   textInput: {
     backgroundColor: 'white',
     height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
+    borderColor: '#d6d8db',
+    borderWidth: 0.5,
     paddingLeft: 8,
     width: '70%',
   },
 
-  redSection: {
+  greySection: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#C4C4C4',
-    height: 60,
+    backgroundColor: '#e2e3e5',
+    borderTopWidth: 0.5,
+    borderTopColor: '#d6d8db',
+    height: 56,
     flexDirection: 'row',
+    paddingLeft: 8,
   },
 
-  redbutton: {
+  button: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#D21C43',
-    height: 40,
-    borderColor: 'black',
-    borderWidth: 0.3,
     width: '30%',
   },
-
-  fabMenuStyle: {
-    flexDirection: 'row',
-    position: 'absolute',
-    backgroundColor: '#D21C43',
-    borderRadius: 50,
-    borderColor: 'black',
-    borderWidth: 0.5,
-    bottom: 68,
-    right: 8,
-    justifyContent: 'flex-end'
-  },
-
 
 });

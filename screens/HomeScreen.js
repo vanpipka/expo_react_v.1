@@ -401,9 +401,18 @@ class WorkerInfoScreen extends React.Component {
     WorkerInfo = this.RenderWorkerInfo();
 
     return (
-      <View styles={styles.container}>
+      <View style={styles.container}>
         {WorkerInfo}
-        <View style={{height:200}} />
+        <TouchableOpacity style={styles.fabMenuStyle}
+          onPress={this._NewMessageAsync}>
+          <IconEl
+            reverse
+            size={20}
+            name={ Platform.OS === 'ios' ? 'ios-chatbubbles' : 'md-chatbubbles' }
+            type='ionicon'
+            color='#D21C43'
+            />
+        </TouchableOpacity>
       </View>
     );
 
@@ -459,45 +468,45 @@ class WorkerInfoScreen extends React.Component {
         }
 
         return (
-          <View key={item.id} style={{margin:8}}>
-            <ImageBackground resizeMode='contain' source = {photoSource} style={{width:'100%', height: 150,}}>
-              <View style={{flex:1, alignItems: 'flex-end', marginRight: 10, marginTop: 8,}}>
-                {dataCheckIcon}
-              </View>
-              {rating}
-            </ImageBackground>
-            <View style={{backgroundColor: '#D1ECF1', padding:8,}}>
-              <View style={{flexDirection: 'row'}}>
-                <Icon.Ionicons style={{width: '10%'}} name={Platform.OS === 'ios' ? 'ios-phone-portrait': 'md-phone-portrait'} size={20} color={'grey'}/>
-                <Text onPress = {() => {Linking.openURL(`tel:${phoneNumber}`)}}  style={{color: 'grey', width: '90%'}}>{phoneNumber}</Text>
-              </View>
-              <View style={{flexDirection: 'row'}}>
-                <Icon.Ionicons style={{width: '10%'}} name={Platform.OS === 'ios' ? 'ios-mail': 'md-mail'} size={20} color={'grey'}/>
-                <Text style={{color: 'grey', width: '90%'}}>{emailaddress}</Text>
-              </View>
-            </View>
-            <View style={{margin:8, marginTop:0}}>
-              <View style={{flexDirection: 'row'}}>
-                <Text style={{color:'#D21C43', fontWeight: 'bold', marginTop: 8, width: '80%'}}>{name}</Text>
-                <View style={{flex: 1, alignItems: 'flex-end', marginTop:8,}}>
-                  {isOnline}
+            <View key = {item.id} style={{margin:8}}>
+              <ImageBackground resizeMode='contain' source = {photoSource} style={{width:'100%', height: 150,}}>
+                <View style={{flex:1, alignItems: 'flex-end', marginRight: 10, marginTop: 8,}}>
+                  {dataCheckIcon}
+                </View>
+                {rating}
+              </ImageBackground>
+              <View style={{backgroundColor: '#D1ECF1', padding:8,}}>
+                <View style={{flexDirection: 'row'}}>
+                  <Icon.Ionicons style={{width: '10%'}} name={Platform.OS === 'ios' ? 'ios-phone-portrait': 'md-phone-portrait'} size={20} color={'grey'}/>
+                  <Text onPress = {() => {Linking.openURL(`tel:${phoneNumber}`)}}  style={{color: 'grey', width: '90%'}}>{phoneNumber}</Text>
+                </View>
+                <View style={{flexDirection: 'row'}}>
+                  <Icon.Ionicons style={{width: '10%'}} name={Platform.OS === 'ios' ? 'ios-mail': 'md-mail'} size={20} color={'grey'}/>
+                  <Text style={{color: 'grey', width: '90%'}}>{emailaddress}</Text>
                 </View>
               </View>
-              <Text style={{color:'grey', fontWeight: '100'}}>{city}</Text>
-              <View style={{flexWrap: 'wrap', flexDirection: 'row'}}>
-                {professions}
+              <View style={{margin:8, marginTop:0}}>
+                <View style={{flexDirection: 'row'}}>
+                  <Text style={{color:'#D21C43', fontWeight: 'bold', marginTop: 8, width: '80%'}}>{name}</Text>
+                  <View style={{flex: 1, alignItems: 'flex-end', marginTop:8,}}>
+                    {isOnline}
+                  </View>
+                </View>
+                <Text style={{color:'grey', fontWeight: '100'}}>{city}</Text>
+                <View style={{flexWrap: 'wrap', flexDirection: 'row'}}>
+                  {professions}
+                </View>
+                <Text style={{color:'grey',}}>Стаж {experienceyear} лет</Text>
+                <View style={{flexWrap: 'wrap', flexDirection: 'row'}}>
+                  {attributes}
+                </View>
               </View>
-              <Text style={{color:'grey',}}>Стаж {experienceyear} лет</Text>
-              <View style={{flexWrap: 'wrap', flexDirection: 'row'}}>
-                {attributes}
-              </View>
+              <View style={{ borderBottomWidth:1, borderBottomColor: 'white'}}/>
+              {priceList}
+              <View style={{ borderBottomWidth:1, borderBottomColor: 'white'}}/>
+              {experience}
+              {description}
             </View>
-            <View style={{ borderBottomWidth:1, borderBottomColor: 'white'}}/>
-            {priceList}
-            <View style={{ borderBottomWidth:1, borderBottomColor: 'white'}}/>
-            {experience}
-            {description}
-          </View>
         )
       });
       return <View>{list}</View>;
@@ -656,6 +665,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#D21C43',
     height: 40,
+
   },
 
   fabMenuStyle: {
@@ -668,6 +678,6 @@ const styles = StyleSheet.create({
     bottom: 48,
     right: 8,
     justifyContent: 'flex-end'
-  }
+  },
 
 });

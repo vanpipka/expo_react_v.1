@@ -142,14 +142,14 @@ export class MessagesScreen extends React.Component {
                 />
               }
             />
-            <TouchableOpacity onPress={this._NewMessageAsync} style={styles.redSection}>
-              <Text style={{color: 'white', marginRight: 8, marginTop: -4}}>Новое сообщение</Text>
-            </TouchableOpacity>
-
           </View>
     );
   }
 }
+
+//<TouchableOpacity onPress={this._NewMessageAsync} style={styles.redSection}>
+//  <Text style={{color: 'white', marginRight: 8, marginTop: -4}}>Новое сообщение</Text>
+//</TouchableOpacity>
 
 class AuthLoadingScreen extends React.Component {
 
