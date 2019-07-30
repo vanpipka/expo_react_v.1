@@ -39,7 +39,7 @@ class LogoTitle extends React.Component {
           source={{uri: this.props.recipient.url}}
           style={{ width: 30, height: 30 }}
         />
-        <Text style={{ fontWeight: 'bold', fontSize: 20 }}>
+        <Text style={{ fontWeight: 'bold', fontSize: 20, paddingLeft: 8 }}>
           {this.props.recipient.name}
         </Text>
       </View>
@@ -51,17 +51,16 @@ class MyListItem extends React.PureComponent {
 
   render() {
     let data = this.props.data;
+    let color = data.itsMe ? 'red': 'green';
+
     return (
-      <View style={{borderWidth:0.5, borderColor: '#E5E5E5', padding: 8, margin:8}}>
-        <View style={{flexDirection: 'row'}}>
-          <View>
-            <View style={{flexDirection: 'row'}}>
-              <Text style={{width: '70%', fontWeight: 'bold'}}>{data.theme}</Text>
-              <Text style={{width: '30%', fontSize: 12, color: 'grey', marginTop: 2}}>{data.date.substring(0,10)}</Text>
+      <View style={data.itsMe ? {alignItems: 'flex-end'} : {alignItems: 'flex-start'}}>
+          <View style={data.itsMe ? styles.rightMessage : styles.leftMessage}>
+            <Text multiline = {true}>{data.text}</Text>
+            <View style = {{width: '100%', alignItems: 'flex-end'}}>
+              <Text style={{fontSize: 8, marginTop: 2}}>{data.created}</Text>
             </View>
-            <Text style={{color: 'grey'}}>{data.text}</Text>
           </View>
-        </View>
       </View>
     );
   }
@@ -77,18 +76,10 @@ export default class MessagesScreen extends React.Component {
         };
   };
 
-      /* render function, etc */
-
   constructor(props) {
     super(props);
-
     const { navigation } = this.props;
-
-    const id = navigation.getParam('id', '');
-    const name = navigation.getParam('name', '');
-    const fotourl = navigation.getParam('fotourl', '');
-
-    this.state = {data: [], refreshing: false, errors: [], id: id};
+    this.state = {data: [], refreshing: false, errors: [], id: navigation.getParam('id', '')};
   }
 
   componentWillMount() {
@@ -100,26 +91,13 @@ export default class MessagesScreen extends React.Component {
   _loadAsync = async () => {
 
       this.setState({refreshing: true});
-
       let dataJSON  = await GetQueryResult({method: 'GET', url: API+this.state.id});
 
-      this.setState({refreshing: false, text: JSON.stringify(dataJSON)});
-
-      //if (dataJSON['status'] === true) {
-      //  this.setState({data:  dataJSON['dataset'], refreshing: false, text: JSON.stringify(dataJSON)});
-      //}else{
-      //  this.setState({errors: dataJSON['errors'], refreshing: false, text: JSON.stringify(dataJSON)});
-      //};
-
-      //let dataJSON  = await GetQueryResult({method: 'POST', url: API, body: body});
-
-      //if (dataJSON['status'] === true) {
-
-      //  this.setState({data:  dataJSON['dataset'], refreshing: true});
-      //}
-      //else{
-      //  this.setState({errors: dataJSON['errors'], refreshing: true});
-      //}
+      if (dataJSON['status'] === true) {
+        this.setState({data:  dataJSON['messageList'], refreshing: false, text: JSON.stringify(dataJSON)});
+      }else{
+        this.setState({errors: dataJSON['errors'], refreshing: false, text: JSON.stringify(dataJSON)});
+      };
 
   }
 
@@ -127,7 +105,6 @@ export default class MessagesScreen extends React.Component {
       <MyListItem
         id = {item.id}
         data = {item}
-        title={item.description}
       />
     );
 
@@ -220,9 +197,6 @@ export default class MessagesScreen extends React.Component {
     /*            */
     return (
           <View style={styles.container}>
-            <Text multiline={true}>
-                {this.state.text}
-            </Text>
             <FlatList
               data={this.state.data}
               extraData={this.state}
@@ -267,6 +241,26 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderColor: 'gray',
     borderWidth: 1,
+  },
+
+  rightMessage: {
+    backgroundColor: '#cce5ff',
+    borderColor: '#b8daff',
+    color: '#004085',
+    borderWidth:0.5,
+    padding: 8,
+    margin:8,
+    width: '60%'
+  },
+
+  leftMessage: {
+    backgroundColor: '#e2e3e5',
+    borderColor: '#d6d8db',
+    color: '#383d41',
+    borderWidth:0.5,
+    padding: 8,
+    margin:8,
+    width: '60%'
   },
 
   textInput: {
