@@ -98,7 +98,7 @@ class MainPageScreen extends React.Component {
       <View style={styles.container}>
         <View style = {{backgroundColor:'grey'}}>
           <Text style = {{marginLeft:8, marginRight:8,marginTop:8, color: 'white'}}>
-            Найти сотрудников для работы на выставке (v.: 0.0.5)
+            Найти сотрудников для работы на выставке (v.: 0.0.6)
           </Text>
           <TouchableOpacity onPress={() => this.props.navigation.navigate("SelectProfessionPage", {profession: this.state.profession, onGoBack: this._refreshProfession})}>
             <Text style={styles.textInput}>{this.state.profession === '' ? 'Введите профессию для поиска' : this.state.profession}</Text>
