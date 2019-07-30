@@ -1,0 +1,37 @@
+{
+  "name": "ExpoApp",
+  "displayName": "vseEXPO",
+  "expo": {
+    "name": "vseEXPO",
+    "slug": "vseEXPO",
+    "privacy": "public",
+    "sdkVersion": "33.0.0",
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "version": "2.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "primaryColor": "#D21C43",
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "assets/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.vseexpo.app"
+    },
+    "android": {
+      "package": "com.vseexpo.app",
+      "versionCode": 5,
+    }
+  }
+}
