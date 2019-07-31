@@ -128,6 +128,10 @@ export class MessagesScreen extends React.Component {
 
   render() {
 
+    if (this.state.errors.length != 0) {
+      return (<ErrorPage mistake={this.state.errors}/>);
+    }
+
     return (
           <View style={styles.container}>
             <FlatList

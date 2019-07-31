@@ -20,11 +20,11 @@ import {
   SafeAreaView,
 } from 'react-native';
 
-import { GetQueryResult } from '../components/WebAPI';
+import {GetQueryResult} from '../components/WebAPI';
 import StarRating from '../components/Rating';
 import LoadingPage from '../screens/LoadingPage';
 import Urls from '../constants/Urls';
-
+import * as ImagePicker from 'expo-image-picker';
 import { CheckBox, ButtonGroup } from 'react-native-elements';
 import DatePicker from 'react-native-datepicker';
 
@@ -42,7 +42,7 @@ class LogoTitle extends React.Component {
 
   _exitAsync = async () => {
     //Alert.alert('!!!')
-    await AsyncStorage.clear();
+    await AsyncStorage.removeItem('sessionid');
     this.props.navigation.navigate('SignIn');
   };
 
@@ -59,14 +59,49 @@ export default class SettingsScreen extends React.Component {
       const { navigation } = this.props;
       const data = navigation.getParam('data', '');
 
-      this.state = {dataisloading: false, data: data,};
+      this.state = {dataisloading: false, data: data, image: null, imagebase64: null};
       this.SetListState = this.SetListState.bind(this);
-      this._bootstrapAsync();
+
   }
+
+  componentDidMount() {
+    this.getPermissionAsync();
+    this._bootstrapAsync();
+  }
+
+  getPermissionAsync = async () => {
+    if (Platform.OS === 'ios') {
+      const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+      if (status !== 'granted') {
+        alert('Sorry, we need camera roll permissions to make this work!');
+      }
+    }
+  }
+
+  _pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality : 1,
+      aspect: [4, 4],
+      base64: true,
+    });
+
+    //console.log(result)
+
+    if (!result.cancelled) {
+
+      //let data = this.state.data;
+      //data['fotourl'] = result.base64$
+
+      this.setState({ image: result.uri, fotourl: encodeURIComponent('data:image/png;base64,'+result.base64)});
+    }
+  };
 
   render() {
 
-    if (!this.state.dataisloading){
+    let { dataisloading } = this.state;
+
+    if (!dataisloading){
       return(<LoadingPage/>);
     }
     /* Go ahead and delete ExpoConfigView and replace it with your
@@ -167,13 +202,16 @@ export default class SettingsScreen extends React.Component {
           return (
             <View key = {index} style={{flexDirection: 'row'}}>
               <View style={{width: '50%', height: 150}}>
-                <ImageBackground resizeMode='contain' source = {this.GetFotoURL(item.value)} style={{width:'100%', height: 150, marginRight:-8}}/>
+                {this.state.image &&
+                  <Image resizeMode='contain' source={{ uri: this.state.image }} style={{ width: 150, height: 150, marginRight:-8 }} />}
+                {!this.state.image &&
+                  <ImageBackground resizeMode='contain' source = {this.GetFotoURL(item.value)} style={{width: 150, height: 150, marginRight:-8}}/>}
               </View>
               <View style={{width: '50%', height: 150}}>
                 <TouchableOpacity>
                   {ratingView}
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.whitebutton}>
+                <TouchableOpacity style={styles.whitebutton} onPress = {this._pickImage}>
                   <Text style={{color:'#D21C43', fontWeight: 'bold'}}>Сменить фото</Text>
                 </TouchableOpacity>
               </View>
@@ -542,6 +580,8 @@ export default class SettingsScreen extends React.Component {
   };
 
   _saveAsync = async () => {
+
+    //this.state['fotourl'] = this.state.base64
 
     this.setState({dataisloading: false, data: '',});
 

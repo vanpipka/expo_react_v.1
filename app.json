@@ -31,7 +31,7 @@
     },
     "android": {
       "package": "com.vseexpo.app",
-      "versionCode": 5,
+      "versionCode": 5
     }
   }
 }

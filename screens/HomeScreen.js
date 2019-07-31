@@ -25,6 +25,7 @@ import SearchParametersScreen from '../screens/SearchParametersScreen';
 import LoadingPage from '../screens/LoadingPage';
 import ErrorPage from '../screens/ErrorPage';
 import SettingsScreen from '../screens/SettingsScreen';
+import DialogScreen from '../screens/DialogScreen';
 import Background from '../images/bg.png';
 import Utils from '../utils/Utils';
 import Urls from '../constants/Urls';
@@ -195,15 +196,13 @@ class WorkerListScreen extends React.Component {
     WorkerList = this.RenderWorkerList();
 
     return (
-      <View styles={styles.container}>
+      <View style={styles.container}>
         <TouchableOpacity style={styles.redSection}
            onPress={() => this.props.navigation.navigate("SearchParametersPage", {'data': this.state.searchParams, 'onGoBack': this._refreshSearchParameters})} >
           <Text style={{color: 'white'}}>Расширенный поиск</Text>
         </TouchableOpacity>
-        <ScrollView>
+        <ScrollView style={{}}>
           {WorkerList}
-          <View style={{height:50}}>
-          </View>
         </ScrollView>
         <TouchableOpacity style={styles.fabMenuStyle}
           onPress={() => {this.setState({dataIsLoading: false,}); this._searchParamsAsync()}}>
@@ -266,7 +265,7 @@ class WorkerListScreen extends React.Component {
         }
 
         return (
-          <TouchableOpacity key={item.id} style={{margin:8, borderWidth:1, borderColor: '#E5E5E5'}} onPress={() => this.props.navigation.navigate("WorkerInfo", {url: url})}>
+          <TouchableOpacity key={item.id} style={{margin:8, borderWidth:1, borderColor: '#E5E5E5'}} onPress={() => this.props.navigation.navigate("WorkerInfo", {url: url, name: name})}>
             <ImageBackground resizeMode='contain' source = {photoSource} style={{width:'100%', height: 150,}}>
               <View style={{flex:1, alignItems: 'flex-end', marginRight: 10, marginTop: 8,}}>
                 {dataCheckIcon}
@@ -376,8 +375,10 @@ class WorkerListScreen extends React.Component {
 
 class WorkerInfoScreen extends React.Component {
 
-  static navigationOptions = {
-    title: 'Информация о сотруднике',
+  static navigationOptions = ({ navigation }) => {
+    return {
+      title: navigation.getParam('name', 'Информация о сотруднике'),
+    };
   };
 
   constructor(props) {
@@ -604,6 +605,21 @@ class WorkerInfoScreen extends React.Component {
     return {uri: uri}
   }
 
+  _NewMessageAsync = async () => {
+
+    const URI = Urls.SERVER_URL+Urls.DIALOG_LIST_URL+'?recipient='+this.state.url.replace('/worker/m/info?id=', '');
+
+    let data  = await GetQueryResult({method: 'GET', url: URI});
+    if (data.status === true) {
+
+        this.props.navigation.navigate("Dialog", {id: data.dialog.id, recipient: {name: data.dialog.sender.name, url: data.dialog.sender.foto}});
+    }
+    else{
+        //Alert.alert(data.errors);
+    }
+
+  };
+
   _searchParamsAsync = async () => {
 
     const URI = Urls.SERVER_URL+this.state.url;
@@ -620,7 +636,9 @@ const AuthStack = createStackNavigator({  Main: MainPageScreen,
                                           LoadingPage: AuthLoadingScreen,
                                           SelectCityPage: CitysScreen,
                                           SelectProfessionPage:  ProfessionsScreen,
-                                          SearchParametersPage: SearchParametersScreen,});
+                                          SearchParametersPage: SearchParametersScreen,
+                                          Dialog: DialogScreen,
+                                        });
 
 export default createAppContainer(createSwitchNavigator(
   {
@@ -635,6 +653,7 @@ export default createAppContainer(createSwitchNavigator(
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    height: '100%',
   },
 
   textInput: {
@@ -675,7 +694,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     borderColor: 'black',
     borderWidth: 0.5,
-    bottom: 48,
+    bottom: 8,
     right: 8,
     justifyContent: 'flex-end'
   },

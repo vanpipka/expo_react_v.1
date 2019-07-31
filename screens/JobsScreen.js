@@ -13,6 +13,7 @@ import {
   TextInput,
   FlatList,
   Alert,
+  RefreshControl,
 } from 'react-native';
 
 import { GetQueryResult } from '../components/WebAPI';
@@ -35,11 +36,11 @@ export class JobsScreen extends React.Component {
 
   constructor(props) {
     super(props);
-
     const { navigation } = this.props;
+    this.state = {data: [], refreshing: false, errors: [], modalVisible: false};
+  }
 
-    this.state = {data: [], dataIsLoading: false, errors: [], modalVisible: false};
-
+  componentWillMount() {
     this._loadAsync();
   }
 
@@ -51,12 +52,12 @@ export class JobsScreen extends React.Component {
 
   _loadAsync = async () => {
 
+    this.setState({refreshing: true});
     let dataJSON  = await GetQueryResult({method: 'GET', url: JOB_LIST_URL});
-
     if (dataJSON['status'] === true) {
-      this.setState({data:  dataJSON['dataset'], dataIsLoading: true});
+      this.setState({data:  dataJSON['dataset'], refreshing: false});
     }else{
-      this.setState({errors: dataJSON['errors'], dataIsLoading: true});
+      this.setState({errors: dataJSON['errors'], refreshing: false});
     };
 
   }
@@ -92,10 +93,7 @@ export class JobsScreen extends React.Component {
 
   render() {
 
-    if (!this.state.dataIsLoading) {
-      return (<LoadingPage/>);
-    }
-    else if (this.state.errors.length != 0) {
+    if (this.state.errors.length != 0) {
       return (<ErrorPage mistake={this.state.errors}/>);
     }
 
@@ -109,17 +107,13 @@ export class JobsScreen extends React.Component {
               extraData={this.state}
               keyExtractor={this._keyExtractor}
               renderItem={this._renderItem}
-            />
-            <TouchableOpacity style={styles.fabMenuStyle}
-              onPress={() => {this.setState({dataIsLoading: false,}); this._loadAsync()}}>
-              <Icon
-                reverse
-                size={20}
-                name='md-sync'
-                type='ionicon'
-                color='#D21C43'
+              refreshControl={
+                <RefreshControl
+                  refreshing={this.state.refreshing}
+                  onRefresh={this._loadAsync}
                 />
-            </TouchableOpacity>
+              }
+            />
           </View>
     );
     /*<TouchableOpacity style={styles.redSection} onPress={this._saveServicesAsync}>
@@ -270,16 +264,5 @@ const styles = StyleSheet.create({
     margin: 8,
   },
 
-  fabMenuStyle: {
-    flexDirection: 'row',
-    position: 'absolute',
-    backgroundColor: '#D21C43',
-    borderRadius: 50,
-    borderColor: 'black',
-    borderWidth: 0.5,
-    bottom: 8,
-    right: 8,
-    justifyContent: 'flex-end'
-  }
 
 });

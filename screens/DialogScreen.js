@@ -92,6 +92,7 @@ export default class MessagesScreen extends React.Component {
   _loadAsync = async () => {
 
       this.setState({refreshing: true});
+
       let dataJSON  = await GetQueryResult({method: 'GET', url: DIALOG_LIST_URL+this.state.id});
 
       if (dataJSON['status'] === true) {
@@ -180,7 +181,7 @@ export default class MessagesScreen extends React.Component {
                   style={styles.textInput}
                   onChangeText={(message) => this.setState({message})}
                   value={this.state.message}
-                  placeholder = 'Введите ссобщение'
+                  placeholder = 'Введите сообщение'
                 />
                 <TouchableOpacity
                   style={styles.button}

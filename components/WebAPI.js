@@ -73,6 +73,7 @@ _getTokenAsync = async (props) => {
       _setSessionInfo(dataJSON);
     } catch (e) {
       //не обрабатываем
+      console.log('Ответ сервера: '+data)
       Alert.alert('Ошибка')
     }
 

@@ -110,6 +110,8 @@ class SignInScreen extends React.Component {
 
     if (dataJSON['errors'] != undefined) { errors = dataJSON['errors'];}
 
+    Alert.alert(''+sessionid);
+
     if (sessionid != null) {
         this.props.navigation.navigate('Home');
     }else{
