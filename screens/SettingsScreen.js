@@ -59,7 +59,7 @@ export default class SettingsScreen extends React.Component {
       const { navigation } = this.props;
       const data = navigation.getParam('data', '');
 
-      this.state = {dataisloading: false, data: data, image: null, imagebase64: null};
+      this.state = {dataisloading: false, data: data, image: null, imagebase64: null, refreshing: false};
       this.SetListState = this.SetListState.bind(this);
 
   }
@@ -90,10 +90,17 @@ export default class SettingsScreen extends React.Component {
 
     if (!result.cancelled) {
 
-      //let data = this.state.data;
-      //data['fotourl'] = result.base64$
+      this.setState({dataisloading: false,});
 
-      this.setState({ image: result.uri, fotourl: encodeURIComponent('data:image/png;base64,'+result.base64)});
+      const SAVESETTINGS_URL = Urls.SERVER_URL+Urls.SAVESETTINGS_URL;
+      let bodyData = {fotourl: result.base64};
+
+      let body = encodeURIComponent('csrfmiddlewaretoken') + '=' + await AsyncStorage.getItem('csrfmiddlewaretoken')
+                  +"&"+ encodeURIComponent('data') + '=' + encodeURIComponent(JSON.stringify(bodyData));
+
+      let dataJSON  = await GetQueryResult({method: 'POST', url: SAVESETTINGS_URL, body: body});
+
+      this.setState({dataisloading: true, image: result.uri});
     }
   };
 
@@ -131,7 +138,14 @@ export default class SettingsScreen extends React.Component {
         return(
           <SafeAreaView style={{flex: 1}}>
             <View style={styles.container}>
-               <ScrollView>
+               <ScrollView
+                 refreshControl={
+                   <RefreshControl
+                     refreshing={this.state.refreshing}
+                     onRefresh={this._bootstrapAsync}
+                   />
+                 }
+                >
                  <TouchableOpacity onPress={this._exitAsync} style={styles.greySection}>
                    <Text style={{color: 'grey', marginRight: 8, marginTop: -4}}>Выйти</Text>
                  </TouchableOpacity>
@@ -586,9 +600,32 @@ export default class SettingsScreen extends React.Component {
     this.setState({dataisloading: false, data: '',});
 
     const SAVESETTINGS_URL = Urls.SERVER_URL+Urls.SAVESETTINGS_URL;
+    let bodyData = {};
+
+    bodyData['name']            = this.state.name ;
+    bodyData['surname']         = this.state.surname ;
+    bodyData['lastname']        = this.state.lastname ;
+    bodyData['emailaddress']    = this.state.emailaddress ;
+    bodyData['phonenumber']     = this.state.phonenumber ;
+    bodyData['city']            = this.state.city ;
+    bodyData['haveip']          = this.state.haveip ;
+    bodyData['workpermit']      = this.state.workpermit ;
+    bodyData['experiencedate']  = this.state.experiencedate ;
+    bodyData['salary']          = this.state.salary ;
+    bodyData['experience']      = this.state.experience ;
+    bodyData['country']         = this.state.country ;
+    bodyData['birthday']        = this.state.birthday ;
+    bodyData['haveinstrument']  = this.state.haveinstrument ;
+    bodyData['publishdata']     = this.state.publishdata ;
+    bodyData['professions']     = this.state.professions ;
+    bodyData['readytotravel']   = this.state.readytotravel ;
+    bodyData['haveshengen']     = this.state.haveshengen ;
+    bodyData['haveintpass']     = this.state.haveintpass ;
+    bodyData['sex']             = this.state.sex ;
+    bodyData['services']        = this.state.services ;
 
     let body = encodeURIComponent('csrfmiddlewaretoken') + '=' + await AsyncStorage.getItem('csrfmiddlewaretoken')
-                +"&"+ encodeURIComponent('data') + '=' + JSON.stringify(this.state);
+                +"&"+ encodeURIComponent('data') + '=' + encodeURIComponent(JSON.stringify(bodyData));
 
     let dataJSON  = await GetQueryResult({method: 'POST', url: SAVESETTINGS_URL, body: body});
 
