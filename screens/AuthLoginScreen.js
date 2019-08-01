@@ -184,6 +184,9 @@ class SignUpScreen extends React.Component {
         userNameEditable = false;
         form =
           <View>
+            {this.state.errors['confirmphone'] &&
+              <Text style={styles.errorText}>{this.state.errors['confirmphone']}</Text>
+            }
             <TextInput
               style={styles.textInput}
               onChangeText={(confirmphone) => this.setState({confirmphone})}
@@ -191,14 +194,14 @@ class SignUpScreen extends React.Component {
               value={this.state.confirmphone}
               placeholder = 'Код подтверждения'
             />
-            {this.state.errors['confirmphone'] &&
-              <Text style={styles.errorText}>{this.state.errors['confirmphone']}</Text>
-            }
           </View>
       }
     else {
       form =
         <View>
+          {this.state.errors['password1'] &&
+            <Text style={styles.errorText}>{this.state.errors['password1']}</Text>
+          }
           <TextInput
             style={styles.textInput}
             onChangeText={(password1) => this.setState({password1})}
@@ -207,8 +210,8 @@ class SignUpScreen extends React.Component {
             value={this.state.password1}
             placeholder = 'Пароль'
           />
-          {this.state.errors['password1'] &&
-            <Text style={styles.errorText}>{this.state.errors['password1']}</Text>
+          {this.state.errors['password2'] &&
+            <Text style={styles.errorText}>{this.state.errors['password2']}</Text>
           }
           <TextInput
             style={styles.textInput}
@@ -217,9 +220,6 @@ class SignUpScreen extends React.Component {
             value={this.state.password2}
             placeholder = 'Подтверждение пароля'
           />
-          {this.state.errors['password2'] &&
-            <Text style={styles.errorText}>{this.state.errors['password2']}</Text>
-          }
           {this.state.errors['__all__'] &&
             <Text style={styles.errorText}>{this.state.errors['__all__']}</Text>
           }
@@ -232,16 +232,19 @@ class SignUpScreen extends React.Component {
         <View style={styles.container}>
           <ImageBackground source={require('../images/bg.png')} style={{width: '100%', height: '100%', alignItems: 'center',}}>
             <View style = {{backgroundColor:'grey', width:'90%', marginTop: '45%', padding:8, paddingTop: 10,}}>
+              {this.state.errors['username'] &&
+                <Text style={styles.errorText}>{this.state.errors['username']}</Text>
+              }
               <TextInput
                 style={styles.textInput}
                 onChangeText={(username) => this.setState({username: username.replace(/[^0-9]/g, '')})}
                 value={this.state.username}
                 placeholder = 'Номер телефона'
               />
-              {this.state.errors['username'] &&
-                <Text style={styles.errorText}>{this.state.errors['username']}</Text>
-              }
               {form}
+              {this.state.errors['privacyPolicy'] &&
+                <Text style={styles.errorText}>{this.state.errors['privacyPolicy']}</Text>
+              }
               <View style = {{ flexDirection: 'row', alignItems: 'center'}}>
                 <CheckBox
                   checked={this.state.privacyPolicy}
@@ -255,9 +258,6 @@ class SignUpScreen extends React.Component {
                   </Text>
                 </View>
               </View>
-              {this.state.errors['privacyPolicy'] &&
-                <Text style={styles.errorText}>{this.state.errors['privacyPolicy']}</Text>
-              }
               <TouchableOpacity //
                 onPress={this._loginAsync}
                 style={styles.redbutton}>
@@ -331,8 +331,8 @@ class SignUpScreen extends React.Component {
       }
       else{
 
-        console.log(JSON.stringify(dataJSON));
-        //this.setState({data: JSON.stringify(dataJSON), errors: errors});
+        //console.log(JSON.stringify(dataJSON));
+        this.setState({data: JSON.stringify(dataJSON), errors: errors});
       };
 
   };
