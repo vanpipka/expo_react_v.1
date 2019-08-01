@@ -39,10 +39,6 @@ export default class SettingsScreen extends React.Component {
   setListState(selected){
     let searchParams = this.state.data;
 
-    console.log(selected);
-    console.log('selected.groupName: '+selected.groupName);
-    console.log('selected.value: '+selected.value);
-
     searchParams[selected.groupName] = selected.value;
     this.setState({data: searchParams});
   };
