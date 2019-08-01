@@ -12,6 +12,8 @@ import {
   TextInput,
   Alert,
   Platform,
+  KeyboardAvoidingView,
+  SafeAreaView,
 } from 'react-native';
 import { WebBrowser } from 'expo';
 import { CheckBox } from 'react-native-elements';
@@ -52,45 +54,46 @@ class SignInScreen extends React.Component {
     }
 
     return (
-
-      <View style={styles.container}>
-        <ImageBackground source={require('../images/bg.png')} style={{width: '100%', height: '100%', alignItems: 'center',}}>
-          <View style = {{backgroundColor:'grey', width:'90%', marginTop:'50%', padding:8}}>
-            {this.state.errors['username'] != undefined ?
-                <Text style={styles.errorText}>{this.state.errors['username']}</Text> : null
-            }
-            <TextInput
-              style={styles.textInput}
-              onChangeText={(username) => this.setState({username: username.replace(/[^0-9]/g, '')})}
-              value={this.state.username}
-              placeholder = 'Номер телефона'
-            />
-            {this.state.errors['password'] != undefined ?
-                <Text style={styles.errorText}>{this.state.errors['password']}</Text> : null
-            }
-            <TextInput
-              style={styles.textInput}
-              onChangeText={(password) => this.setState({password})}
-              secureTextEntry={true}
-              value={this.state.password}
-              placeholder = 'Пароль'
-            />
-            {this.state.errors['__all__'] != undefined ?
-                <Text style={styles.errorText}>{this.state.errors['__all__']}</Text> : null
-            }
-            <TouchableOpacity //
-              onPress={this._loginAsync}
-              style={styles.redbutton}>
-              <Text style={{color: 'white', marginTop: 10}}>ВОЙТИ</Text>
-            </TouchableOpacity>
-            <TouchableOpacity // onPress={this._onPressButton}>
-              style = {{width: '100%', alignItems: 'flex-end', marginTop: 8,}}
-              onPress={this._signUpAsync}>
-              <Text style={{color: 'white', marginRight: 8,}}>Зарегистрироваться</Text>
-            </TouchableOpacity>
-          </View>
-        </ImageBackground>
-      </View>
+      <KeyboardAvoidingView style={{flex: 1}} behavior="padding"  keyboardVerticalOffset={80} enabled>
+        <View style={styles.container}>
+          <ImageBackground source={require('../images/bg.png')} style={{width: '100%', height: '100%', alignItems: 'center',}}>
+            <View style = {{backgroundColor:'grey', width:'90%', marginTop:'50%', padding:8}}>
+              {this.state.errors['username'] != undefined ?
+                  <Text style={styles.errorText}>{this.state.errors['username']}</Text> : null
+              }
+              <TextInput
+                style={styles.textInput}
+                onChangeText={(username) => this.setState({username: username.replace(/[^0-9]/g, '')})}
+                value={this.state.username}
+                placeholder = 'Номер телефона'
+              />
+              {this.state.errors['password'] != undefined ?
+                  <Text style={styles.errorText}>{this.state.errors['password']}</Text> : null
+              }
+              <TextInput
+                style={styles.textInput}
+                onChangeText={(password) => this.setState({password})}
+                secureTextEntry={true}
+                value={this.state.password}
+                placeholder = 'Пароль'
+              />
+              {this.state.errors['__all__'] != undefined ?
+                  <Text style={styles.errorText}>{this.state.errors['__all__']}</Text> : null
+              }
+              <TouchableOpacity //
+                onPress={this._loginAsync}
+                style={styles.redbutton}>
+                <Text style={{color: 'white', marginTop: 10}}>ВОЙТИ</Text>
+              </TouchableOpacity>
+              <TouchableOpacity // onPress={this._onPressButton}>
+                style = {{width: '100%', alignItems: 'flex-end', marginTop: 8,}}
+                onPress={this._signUpAsync}>
+                <Text style={{color: 'white', marginRight: 8,}}>Зарегистрироваться</Text>
+              </TouchableOpacity>
+            </View>
+          </ImageBackground>
+        </View>
+      </KeyboardAvoidingView>
     )
   }
 
@@ -109,8 +112,6 @@ class SignInScreen extends React.Component {
     let cookies = {};
 
     if (dataJSON['errors'] != undefined) { errors = dataJSON['errors'];}
-
-    Alert.alert(''+sessionid);
 
     if (sessionid != null) {
         this.props.navigation.navigate('Home');
@@ -180,11 +181,7 @@ class SignUpScreen extends React.Component {
     let userNameEditable = true;
 
     if (this.state.errors['confirmphone'] != null) {
-
         userNameEditable = false;
-
-        let errorValue = this.state.errors['confirmphone'] == true ? null : <Text style={styles.errorText}>{this.state.errors['confirmphone']}</Text>
-
         form =
           <View>
             <TextInput
@@ -194,13 +191,14 @@ class SignUpScreen extends React.Component {
               value={this.state.confirmphone}
               placeholder = 'Код подтверждения'
             />
-            {errorValue}
+            {this.state.errors['confirmphone'] &&
+              <Text style={styles.errorText}>{this.state.errors['confirmphone']}</Text>
+            }
           </View>
       }
     else {
       form =
         <View>
-          <Text></Text>
           <TextInput
             style={styles.textInput}
             onChangeText={(password1) => this.setState({password1})}
@@ -209,8 +207,9 @@ class SignUpScreen extends React.Component {
             value={this.state.password1}
             placeholder = 'Пароль'
           />
-          <Text style={styles.errorText}>{this.state.errors['password1']}</Text>
-          <Text></Text>
+          {this.state.errors['password1'] &&
+            <Text style={styles.errorText}>{this.state.errors['password1']}</Text>
+          }
           <TextInput
             style={styles.textInput}
             onChangeText={(password2) => this.setState({password2})}
@@ -218,46 +217,56 @@ class SignUpScreen extends React.Component {
             value={this.state.password2}
             placeholder = 'Подтверждение пароля'
           />
-          <Text style={styles.errorText}>{this.state.errors['password2']}</Text><Text style={styles.errorText}>{this.state.errors['__all__']}</Text>
+          {this.state.errors['password2'] &&
+            <Text style={styles.errorText}>{this.state.errors['password2']}</Text>
+          }
+          {this.state.errors['__all__'] &&
+            <Text style={styles.errorText}>{this.state.errors['__all__']}</Text>
+          }
         </View>
 
     }
 
     return (
-      <View style={styles.container}>
-        <ImageBackground source={require('../images/bg.png')} style={{width: '100%', height: '100%', alignItems: 'center',}}>
-          <View style = {{backgroundColor:'grey', width:'90%', marginTop: '45%', padding:8, paddingTop: 10,}}>
-            <TextInput
-              style={styles.textInput}
-              onChangeText={(username) => this.setState({username: username.replace(/[^0-9]/g, '')})}
-              value={this.state.username}
-              placeholder = 'Номер телефона'
-            />
-            <Text style={styles.errorText}>{this.state.errors['username']}</Text>
-            {form}
-            <View style = {{ flexDirection: 'row'}}>
-              <CheckBox
-                checked={this.state.privacyPolicy}
-                checkedColor = {'#D21C43'}
-                onPress={() => this.setState({privacyPolicy: !this.state.privacyPolicy})}
+      <KeyboardAvoidingView style={{flex: 1}} behavior="padding"  keyboardVerticalOffset={80} enabled>
+        <View style={styles.container}>
+          <ImageBackground source={require('../images/bg.png')} style={{width: '100%', height: '100%', alignItems: 'center',}}>
+            <View style = {{backgroundColor:'grey', width:'90%', marginTop: '45%', padding:8, paddingTop: 10,}}>
+              <TextInput
+                style={styles.textInput}
+                onChangeText={(username) => this.setState({username: username.replace(/[^0-9]/g, '')})}
+                value={this.state.username}
+                placeholder = 'Номер телефона'
               />
-              <View style={{flexWrap: 'wrap', flexDirection: 'row'}}>
-                <Text style={{fontSize: 10,}}>Я ознакомлен и согласен с </Text>
-                <Text onPress={this._handleLearnMorePress} style={styles.helpLinkText}>
-                  Условиями использования
-                </Text>
-                <Text style={{fontSize: 10,}}> в полном объеме</Text>
+              {this.state.errors['username'] &&
+                <Text style={styles.errorText}>{this.state.errors['username']}</Text>
+              }
+              {form}
+              <View style = {{ flexDirection: 'row', alignItems: 'center'}}>
+                <CheckBox
+                  checked={this.state.privacyPolicy}
+                  checkedColor = {'#D21C43'}
+                  onPress={() => this.setState({privacyPolicy: !this.state.privacyPolicy})}
+                />
+                <View style={{flexWrap: 'wrap'}}>
+                  <Text style={{fontSize: 10,}}>Я в полном объеме ознакомлен и согласен с </Text>
+                  <Text onPress={this._handleLearnMorePress} style={styles.helpLinkText}>
+                    Условиями использования
+                  </Text>
+                </View>
               </View>
+              {this.state.errors['privacyPolicy'] &&
+                <Text style={styles.errorText}>{this.state.errors['privacyPolicy']}</Text>
+              }
+              <TouchableOpacity //
+                onPress={this._loginAsync}
+                style={styles.redbutton}>
+                <Text style={{color: 'white', marginTop: 10}}>ЗАРЕГИСТРИРОВАТЬСЯ</Text>
+              </TouchableOpacity>
             </View>
-            <Text style={styles.errorText}>{this.state.errors['privacyPolicy']}</Text>
-            <TouchableOpacity //
-              onPress={this._loginAsync}
-              style={styles.redbutton}>
-              <Text style={{color: 'white', marginTop: 10}}>ЗАРЕГИСТРИРОВАТЬСЯ</Text>
-            </TouchableOpacity>
-          </View>
-        </ImageBackground>
-      </View>
+          </ImageBackground>
+        </View>
+      </KeyboardAvoidingView>
     );
   }
 
@@ -298,24 +307,12 @@ class SignUpScreen extends React.Component {
   _loginAsync = async () => {
 
       if (!this.state.privacyPolicy) {
+        console.log('Необходимо подтвердить условия использования');
         this.setState({errors: {privacyPolicy: 'Необходимо подтвердить условия использования'}});
         return;
       }
 
-      let headers = {};
-
-      headers["X-Requested-With"] = "XMLHttpRequest";
-      headers["Cookie"] = "csrftoken="+await AsyncStorage.getItem('csrftoken');
-      headers["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-      headers["Accept-Encoding"] = "gzip, deflate",
-      headers["Accept-Language"] = "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
-      headers["Cache-Control"] =	"max-age=0",
-      headers["Connection"] = "keep-alive",
-      headers["Content-Type"] = "application/x-www-form-urlencoded",
-      headers["Upgrade-Insecure-Requests"] = "1",
-      headers["User-Agent"] = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-      headers["withCredentials"] = true;
-      headers['Cache-Control'] = 'no-cache';
+      const SIGNUP_URL = Urls.SERVER_URL+Urls.REGISTER_URL;
 
       body = encodeURIComponent('username') + '=' + encodeURIComponent(this.state.username) +
         '&'+encodeURIComponent('password1') + '=' + encodeURIComponent(this.state.password1) +
@@ -323,50 +320,20 @@ class SignUpScreen extends React.Component {
         '&'+encodeURIComponent('confirmphone') + '=' + encodeURIComponent(this.state.confirmphone) +
         '&'+encodeURIComponent('csrfmiddlewaretoken') + '=' + await AsyncStorage.getItem('csrfmiddlewaretoken');
 
-    try {
-      let url = Urls.SERVER_URL+Urls.REGISTER_URL;
+      let dataJSON  = await GetQueryResult({method: 'POST', url: SIGNUP_URL, body: body});
 
-      Alert.alert('url', 'стучим в логин');
-
-      let response = await fetch(url, {method: 'POST', body: body, headers: headers});
-      let data = await response.text();
-      if (Platform.OS === 'android') {
-        data = data.replace(/\r?\n/g, '').replace(/[\u0080-\uFFFF]/g, '');
-      }
-
-      Alert.alert('data', 'Получили данные');
-
-      let dataJSON = JSON.parse(data);
-      let errors = {};
-      let cookies = {};
+      let sessionid = await AsyncStorage.getItem('sessionid');
 
       if (dataJSON['errors'] != undefined) { errors = dataJSON['errors'];}
-      if (dataJSON['cookies'] != undefined) { cookies = dataJSON['cookies'];}
 
-      if (dataJSON['csrfmiddlewaretoken'] != null) {await AsyncStorage.setItem('csrfmiddlewaretoken', dataJSON['csrfmiddlewaretoken'])};
-      if (cookies['csrftoken'] != null) {await AsyncStorage.setItem('csrftoken', cookies['csrftoken'])};
-      if (cookies['sessionid'] != null) {
-        await AsyncStorage.setItem('sessionid', cookies['sessionid'])
+      if (sessionid != null) {
         this.props.navigation.navigate('Home');
       }
       else{
-        this.setState({data: data, errors: errors});
+
+        console.log(JSON.stringify(dataJSON));
+        //this.setState({data: JSON.stringify(dataJSON), errors: errors});
       };
-
-      /*let dataJSON = JSON.parse(data);
-      let cookies  = dataJSON['cookies'];
-
-      if (dataJSON['csrfmiddlewaretoken'] != null) {await AsyncStorage.setItem('csrfmiddlewaretoken', dataJSON['csrfmiddlewaretoken'])};
-      if (cookies['csrftoken'] != null) {await AsyncStorage.setItem('csrftoken', cookies['csrftoken'])};
-      if (cookies['sessionid'] != null) {
-        await AsyncStorage.setItem('sessionid', cookies['sessionid'])
-        this.props.navigation.navigate('Home');
-      };*/
-
-
-    } catch (error) {
-        return;
-    };
 
   };
 
