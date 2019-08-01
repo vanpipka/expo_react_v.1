@@ -32,13 +32,17 @@ export default class SettingsScreen extends React.Component {
       this.state = {data: data, dataIsLoading: false, par: []};
 
       this.setListState = this.setListState.bind(this)
-
       this._loadParametersAsync();
 
   };
 
   setListState(selected){
     let searchParams = this.state.data;
+
+    console.log(selected);
+    console.log('selected.groupName: '+selected.groupName);
+    console.log('selected.value: '+selected.value);
+
     searchParams[selected.groupName] = selected.value;
     this.setState({data: searchParams});
   };
@@ -72,6 +76,9 @@ export default class SettingsScreen extends React.Component {
                 onPress={() => this.setBooleanState(item.columnname)}
             />)}
         else if (item.type === 'list') {
+
+            console.log('item.values: '+item.values);
+
             return (
               <View key={index} style={{padding: 8}}>
                 <Text style={{color: 'grey'}}>{item.title}</Text>
