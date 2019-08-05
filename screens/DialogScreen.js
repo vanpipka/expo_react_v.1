@@ -92,7 +92,6 @@ export default class MessagesScreen extends React.Component {
   _loadAsync = async () => {
 
       this.setState({refreshing: true});
-
       let dataJSON  = await GetQueryResult({method: 'GET', url: DIALOG_LIST_URL+this.state.id});
 
       if (dataJSON['status'] === true) {
