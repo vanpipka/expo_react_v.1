@@ -123,7 +123,7 @@ class SignInScreen extends React.Component {
 
   _bootstrapAsync = async () => {
 
-    const LOGIN_URL = Urls.SERVER_URL+Urls.LOGIN_URL;
+    const LOGIN_URL = Urls.SERVER_URL+Urls.CHECK_LOGIN_URL;
 
     body = encodeURIComponent('username') + '=' + encodeURIComponent(this.state.username) +
         '&'+encodeURIComponent('password') + '=' + encodeURIComponent(this.state.password) +
@@ -132,7 +132,7 @@ class SignInScreen extends React.Component {
     let dataJSON  = await GetQueryResult({method: 'POST', url: LOGIN_URL, body: body});
     let sessionid = await AsyncStorage.getItem('sessionid');
 
-    if (sessionid != null) {
+    if (dataJSON['status']) {
         this.props.navigation.navigate('Home');
         return;
     }else{
@@ -307,7 +307,6 @@ class SignUpScreen extends React.Component {
   _loginAsync = async () => {
 
       if (!this.state.privacyPolicy) {
-        console.log('Необходимо подтвердить условия использования');
         this.setState({errors: {privacyPolicy: 'Необходимо подтвердить условия использования'}});
         return;
       }

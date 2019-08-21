@@ -23,6 +23,7 @@ import {
 import {GetQueryResult} from '../components/WebAPI';
 import StarRating from '../components/Rating';
 import LoadingPage from '../screens/LoadingPage';
+import ErrorPage from '../screens/ErrorPage';
 import Urls from '../constants/Urls';
 import * as ImagePicker from 'expo-image-picker';
 import { CheckBox, ButtonGroup } from 'react-native-elements';
@@ -59,7 +60,7 @@ export default class SettingsScreen extends React.Component {
       const { navigation } = this.props;
       const data = navigation.getParam('data', '');
 
-      this.state = {dataisloading: false, data: data, image: null, imagebase64: null, refreshing: false};
+      this.state = {dataisloading: false, data: data, image: null, imagebase64: null, refreshing: false, error: false};
       this.SetListState = this.SetListState.bind(this);
 
   }
@@ -106,11 +107,15 @@ export default class SettingsScreen extends React.Component {
 
   render() {
 
-    let { dataisloading } = this.state;
+    let { dataisloading, error } = this.state;
+
+    if (error){
+      return(<ErrorPage/>);
+    };
 
     if (!dataisloading){
       return(<LoadingPage/>);
-    }
+    };
     /* Go ahead and delete ExpoConfigView and replace it with your
      * content, we just wanted to give you a quick view of your config */
 
@@ -567,24 +572,32 @@ export default class SettingsScreen extends React.Component {
 
       let dataJSON  = await GetQueryResult({method: 'POST', url: LOGIN_URL, body: body});
 
-      let formData = {data: JSON.stringify(dataJSON), dataisloading: true,};
+      let formData = {data: JSON.stringify(dataJSON), dataisloading: true, error: false};
 
-      dataJSON.worker.group.map((item, index) => {
-        item.items.map((item, index) => {
+      //console.log(JSON.stringify(dataJSON));
 
-              if (item.type === 'ref'){
-                  formData[item.columnname] = item.value['id'];
-                  formData[item.columnname+'_name'] = item.value['name'];
-              }
-              else {
-                  formData[item.columnname] = item.value;
-              }
+      if (!dataJSON.worker.group) {
+          this.setState({error: true});
+      } else {
+
+        dataJSON.worker.group.map((item, index) => {
+          item.items.map((item, index) => {
+
+                if (item.type === 'ref'){
+                    formData[item.columnname] = item.value['id'];
+                    formData[item.columnname+'_name'] = item.value['name'];
+                }
+                else {
+                    formData[item.columnname] = item.value;
+                }
+          });
         });
-      });
 
-      if (dataJSON['userid'] != null) {await AsyncStorage.setItem('userid', dataJSON['userid'])};
+        if (dataJSON['userid'] != null) {await AsyncStorage.setItem('userid', dataJSON['userid'])};
 
-      this.setState(formData);
+        this.setState(formData);
+
+    };
 
   };
 

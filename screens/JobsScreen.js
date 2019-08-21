@@ -6,18 +6,15 @@ import {
   Platform,
   Text,
   TouchableOpacity,
-  TouchableHighlight,
   View,
-  Modal,
-  ScrollView,
+  Dimensions,
   TextInput,
   FlatList,
   Alert,
   RefreshControl,
 } from 'react-native';
-
 import { GetQueryResult } from '../components/WebAPI';
-import { Icon } from 'react-native-elements';
+import { Icon, Overlay, Button } from 'react-native-elements';
 import LoadingPage from '../screens/LoadingPage';
 import ErrorPage from '../screens/ErrorPage';
 import Urls from '../constants/Urls';
@@ -37,18 +34,36 @@ export class JobsScreen extends React.Component {
   constructor(props) {
     super(props);
     const { navigation } = this.props;
-    this.state = {data: [], refreshing: false, errors: [], modalVisible: false};
+    this.state = {data: [], refreshing: false, errors: [], modalVisible: false, responseText: ''};
   }
 
   componentWillMount() {
     this._loadAsync();
   }
 
-  _keyExtractor = (item, index) => item.id;
+  _respondToTheOffer = (props) => {
+    console.log(props);
 
-  _onChangeText = (props, text) => {
-    Alert.alert(text)
+    this.setState({modalVisible: true});
+
+    /*this.setState({dataisloading: false, data: '',});
+
+    const SAVESETTINGS_URL = Urls.SERVER_URL+Urls.SAVESETTINGS_URL;
+    let bodyData = {};
+
+    bodyData['job_id']            = this.state.name ;
+    bodyData['job_description']   = this.state.surname ;
+
+    let body = encodeURIComponent('csrfmiddlewaretoken') + '=' + await AsyncStorage.getItem('csrfmiddlewaretoken')
+                +"&"+ encodeURIComponent('data') + '=' + encodeURIComponent(JSON.stringify(bodyData));
+
+    let dataJSON  = await GetQueryResult({method: 'POST', url: SAVESETTINGS_URL, body: body});
+
+    this._bootstrapAsync();*/
+
   };
+
+  _keyExtractor = (item, index) => item.id;
 
   _loadAsync = async () => {
 
@@ -66,8 +81,8 @@ export class JobsScreen extends React.Component {
       <MyListItem
         id = {item.id}
         data = {item}
-        onChangeText = {this._onChangeText}
         title={item.description}
+        onPressItem={this._respondToTheOffer}
       />
     );
 
@@ -97,28 +112,63 @@ export class JobsScreen extends React.Component {
       return (<ErrorPage mistake={this.state.errors}/>);
     }
 
-    //const { goBack } = this.props.navigation;
     const { navigation } = this.props;
 
-    return (
-          <View style={styles.container}>
-            <FlatList
-              data={this.state.data}
-              extraData={this.state}
-              keyExtractor={this._keyExtractor}
-              renderItem={this._renderItem}
-              refreshControl={
-                <RefreshControl
-                  refreshing={this.state.refreshing}
-                  onRefresh={this._loadAsync}
+    if (this.state.modalVisible) {
+      return (
+            <View style={[styles.container, {backgroundColor: "rgba(192,192,192, .5)"}]}>
+              <Overlay
+                height='auto'
+                style={{marginTop: Dimensions.get('window').height/2-200}}
+                isVisible={this.state.modalVisible}
+                windowBackgroundColor="rgba(192,192,192, .5)"
+                onBackdropPress={(text) => this.setState({modalVisible: !this.state.modalVisible})}
+              >
+                <Text style={{marginBottom: 8}}>Сопроводительное письмо</Text>
+                <TextInput
+                      style = {styles.textInputMultiline}
+                      multiline = {true}
+                      numberOfLines = {4}
+                      value={this.state.responseText}
+                      onChangeText={(text) => this.setState({responseText: text})}
                 />
-              }
-            />
-          </View>
-    );
+                <View style={{marginRight: -8, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'flex-end'}}>
+                  <Button
+                    backgroundColor='#03A9F4'
+                    buttonStyle={styles.greybutton}
+                    title='Отмена'
+                    onPress ={(props) => this.setState({modalVisible: !this.state.modalVisible})} />
+                  <Button
+                    icon={<Icon name='done' color='#ffffff' />}
+                    buttonStyle={styles.redbutton}
+                    title='Сохранить' />
+                </View>
+              </Overlay>
+            </View>
+      );
+    } else {
+      return (
+            <View style={styles.container}>
+              <FlatList
+                data={this.state.data}
+                extraData={this.state}
+                keyExtractor={this._keyExtractor}
+                renderItem={this._renderItem}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={this.state.refreshing}
+                    onRefresh={this._loadAsync}
+                  />
+                }
+              />
+            </View>
+      );
+    };
     /*<TouchableOpacity style={styles.redSection} onPress={this._saveServicesAsync}>
       <Text style={{color: 'white'}}>ПРОДОЛЖИТЬ</Text>
     </TouchableOpacity>*/
+
+    /**/
   }
 }
 
@@ -144,8 +194,8 @@ class AuthLoadingScreen extends React.Component {
 
 class MyListItem extends React.PureComponent {
 
-  _onChangeText = (text) => {
-    this.props.onChangeText(this.props, text);
+  _respondToTheOffer = (props) => {
+      this.props.onPressItem(this.props);
   };
 
   render() {
@@ -170,9 +220,10 @@ class MyListItem extends React.PureComponent {
           </View>
         )
       });
-    }
+    };
+
     if (data.response_is_available == 1){
-        button = <TouchableOpacity style={styles.redbutton}><Text style={{color: 'white'}}>Откликнуться</Text></TouchableOpacity>
+        button = <TouchableOpacity style={styles.redbutton} onPress = {this._respondToTheOffer}><Text style={{color: 'white'}}>Откликнуться</Text></TouchableOpacity>
     }
     else if (data.response_is_available == 0) {
         article = <View style={{flexDirection: 'row'}}>
@@ -225,6 +276,7 @@ export default createAppContainer(createSwitchNavigator(
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    alignItems: 'center',
   },
 
   autocompleteContainer: {
@@ -238,13 +290,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
 
-  textInput: {
+  textInputMultiline: {
     backgroundColor: 'white',
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    paddingLeft: 8,
-    width: '100%',
+    height: 160,
+    borderWidth: 0.5,
+    borderColor: '#C4C4C4',
+    padding: 8,
   },
 
   redSection: {
@@ -260,6 +311,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#D21C43',
     height: 40,
     borderColor: 'black',
+    borderWidth: 0.3,
+    margin: 8,
+  },
+
+  greybutton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#C4C4C4',
+    height: 40,
+    borderColor: 'grey',
     borderWidth: 0.3,
     margin: 8,
   },
