@@ -35,9 +35,9 @@ class LogoTitle extends React.Component {
 
   render() {
     return (
-      <View style={{flexDirection: 'row'}}>
+      <View style={{flexDirection: 'row', alignItems: 'center'}}>
         <Avatar
-          size={20}
+          size={30}
           rounded
           source={{ uri: this.props.recipient.url }}
           onPress={() => console.log("Works!")}

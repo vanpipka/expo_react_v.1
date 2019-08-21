@@ -57,7 +57,7 @@ class MyListItem extends React.PureComponent {
           <View style={{width: '70%', height: 75}}>
             <View style={{flexDirection: 'row'}}>
               <Text style={{width: '70%', color: '#D21C43',  fontWeight: 'bold'}}>{data.sender.name}</Text>
-              <Text style={{width: '30%', fontSize: 8, marginTop: 2}}>{data.lastMessage.date}</Text>
+              <Text style={{width: '30%', fontSize: 8, marginTop: 4}}>{data.lastMessage.date}</Text>
             </View>
             <Text style={{color: 'grey'}}>{data.lastMessage.text}</Text>
           </View>
