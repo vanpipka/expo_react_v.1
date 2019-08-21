@@ -10,6 +10,7 @@ export default {
   SELECTIONPARAMETERS_URL: '/m/selectionparameters/',
   WORKERSEARCH_URL: '/worker/m/search/',
   JOB_LIST_URL: '/jobs/',
+  JOB_SAVE_URL: '/jobs/save/',
   MESSAGES_LIST_URL: '/messages/',
   PROFESSIONANDGROUPS_URL: '/m/professionandgroups/',
   LOGIN_URL: '/accounts/login/',

@@ -14,17 +14,17 @@ import {
   RefreshControl,
 } from 'react-native';
 import { GetQueryResult } from '../components/WebAPI';
-import { Icon, Overlay, Button } from 'react-native-elements';
+import { Icon, Overlay, Button, Badge, Avatar, Divider } from 'react-native-elements';
 import LoadingPage from '../screens/LoadingPage';
 import ErrorPage from '../screens/ErrorPage';
 import Urls from '../constants/Urls';
+import Colors from '../constants/Colors';
 import Autocomplete from '../components/Autocomplete';
 
 import { createStackNavigator, createSwitchNavigator, createAppContainer } from 'react-navigation';
 
 const JOB_LIST_URL  = Urls.SERVER_URL+Urls.JOB_LIST_URL;
-const API_SAVE      = Urls.SERVER_URL+Urls.SERVICE_LIST_SAVE_URL;
-
+const JOB_SAVE_URL  = Urls.SERVER_URL+Urls.JOB_SAVE_URL;
 export class JobsScreen extends React.Component {
 
   static navigationOptions = {
@@ -34,33 +34,48 @@ export class JobsScreen extends React.Component {
   constructor(props) {
     super(props);
     const { navigation } = this.props;
-    this.state = {data: [], refreshing: false, errors: [], modalVisible: false, responseText: ''};
+    this.state = {data: [], refreshing: false, errors: [], modalVisible: false, sendingAnswer: false, responseText: '', currentOffer: {}};
   }
 
   componentWillMount() {
     this._loadAsync();
   }
 
-  _respondToTheOffer = (props) => {
-    console.log(props);
+  _respondToTheOffer = async (props) => {
 
-    this.setState({modalVisible: true});
+    let result = {refreshing: false, sendingAnswer: false};
 
-    /*this.setState({dataisloading: false, data: '',});
+    this.setState({sendingAnswer: true});
 
-    const SAVESETTINGS_URL = Urls.SERVER_URL+Urls.SAVESETTINGS_URL;
-    let bodyData = {};
+    if (this.state.currentOffer.id) {
 
-    bodyData['job_id']            = this.state.name ;
-    bodyData['job_description']   = this.state.surname ;
+      let data = JSON.stringify({job_id: this.state.currentOffer.id, job_description: this.state.responseText})
 
-    let body = encodeURIComponent('csrfmiddlewaretoken') + '=' + await AsyncStorage.getItem('csrfmiddlewaretoken')
-                +"&"+ encodeURIComponent('data') + '=' + encodeURIComponent(JSON.stringify(bodyData));
+      let body = encodeURIComponent('csrfmiddlewaretoken') + '=' + await AsyncStorage.getItem('csrfmiddlewaretoken')
+           +'&'+ encodeURIComponent('data') + '=' + data;
 
-    let dataJSON  = await GetQueryResult({method: 'POST', url: SAVESETTINGS_URL, body: body});
+      let dataJSON  = await GetQueryResult({method: 'POST', url: JOB_SAVE_URL, body: body});
 
-    this._bootstrapAsync();*/
+      //console.log(JSON.stringify(dataJSON))
 
+      if (dataJSON['status'] === true) {
+        result['responseText'] = '';
+        result['modalVisible'] = false;
+        this.setState(result);
+        this._loadAsync();
+      }
+      else{
+        result['errors'] = dataJSON['errors'];
+        this.setState(result);
+      };
+    } else {
+        result['errors'] = 'Неизвестная ошибка';
+        this.setState(result);
+    };
+  };
+
+  _openeAnswerWindow = (props) => {
+    this.setState({modalVisible: true, currentOffer: props});
   };
 
   _keyExtractor = (item, index) => item.id;
@@ -69,6 +84,9 @@ export class JobsScreen extends React.Component {
 
     this.setState({refreshing: true});
     let dataJSON  = await GetQueryResult({method: 'GET', url: JOB_LIST_URL});
+
+    //console.log(JSON.stringify(dataJSON));
+
     if (dataJSON['status'] === true) {
       this.setState({data:  dataJSON['dataset'], refreshing: false});
     }else{
@@ -82,7 +100,7 @@ export class JobsScreen extends React.Component {
         id = {item.id}
         data = {item}
         title={item.description}
-        onPressItem={this._respondToTheOffer}
+        onPressItem={this._openeAnswerWindow}
       />
     );
 
@@ -115,6 +133,22 @@ export class JobsScreen extends React.Component {
     const { navigation } = this.props;
 
     if (this.state.modalVisible) {
+
+      let sendButton = null;
+
+      if (this.state.sendingAnswer) {
+        sendButton = <Button
+          loading
+          buttonStyle={styles.redbutton}
+          title='Сохранить'/>
+      } else {
+        sendButton = <Button
+          icon={<Icon name='done' color='#ffffff'/>}
+          buttonStyle={styles.redbutton}
+          title='Сохранить'
+          onPress ={(props) => this._respondToTheOffer()}/>
+      };
+
       return (
             <View style={[styles.container, {backgroundColor: "rgba(192,192,192, .5)"}]}>
               <Overlay
@@ -138,10 +172,7 @@ export class JobsScreen extends React.Component {
                     buttonStyle={styles.greybutton}
                     title='Отмена'
                     onPress ={(props) => this.setState({modalVisible: !this.state.modalVisible})} />
-                  <Button
-                    icon={<Icon name='done' color='#ffffff' />}
-                    buttonStyle={styles.redbutton}
-                    title='Сохранить' />
+                  {sendButton}
                 </View>
               </Overlay>
             </View>
@@ -199,10 +230,15 @@ class MyListItem extends React.PureComponent {
   };
 
   render() {
+
+
+
     let data = this.props.data;
     let button = null;
     let article = null;
     let jobComposition = null;
+
+    console.log(data);
 
     if (data.job_composition.length == 0) {
       jobComposition = <View  style={{marginLeft: 8, marginRight: 8}}>
@@ -215,8 +251,8 @@ class MyListItem extends React.PureComponent {
           <View key={index} style={{flexDirection: 'row', flex: 1,flexGrow: 1, marginLeft: 8, marginRight: 8}}>
             <Text>{item.profession__name}</Text>
             <View style={{marginLeft:4, marginRight:4, marginBottom:8, flexGrow: 1,borderBottomWidth:0.5, borderStyle: 'dotted', borderBottomColor: '#C4C4C4'}}/>
-            <Text>{item.count}</Text><Text style={{color: '#C4C4C4'}}> чел. /</Text>
-            <Text>{item.price}</Text><Text style={{color: '#C4C4C4'}}> руб.</Text>
+            <Text>{item.count}</Text><Text style={{color: Colors.grey}}> чел. /</Text>
+            <Text>{item.price}</Text><Text style={{color: Colors.grey}}> руб.</Text>
           </View>
         )
       });
@@ -226,16 +262,26 @@ class MyListItem extends React.PureComponent {
         button = <TouchableOpacity style={styles.redbutton} onPress = {this._respondToTheOffer}><Text style={{color: 'white'}}>Откликнуться</Text></TouchableOpacity>
     }
     else if (data.response_is_available == 0) {
-        article = <View style={{flexDirection: 'row'}}>
-                    <Icon name='grade'color='#95CCA2'/>
-                    <Text style={{fontSize: 12, color: 'grey', marginTop: -2}}>Вы откликались на этот заказ</Text>
+        article = <View style={{flex:1, alignItems: 'flex-end'}}>
+                    <Badge value = 'отклик доставлен' containerStyle={{ backgroundColor: Colors.green}}/>
                 </View>
     }
 
     return (
-      <View style={{borderWidth:0.5, borderColor: '#C4C4C4', padding: 8, margin:8}}>
-        {article}
-        <View style={{flexDirection: 'row'}}>
+      <View style={{borderWidth:0.5, borderColor: Colors.grey, padding: 8, margin:8}}>
+        <View style = {{flexDirection: 'row', alignItems: 'center', marginBottom: 8}}>
+          <Avatar
+            size={35}
+            rounded
+            source={{ uri: data.photo }}
+            onPress={() => console.log("Works!")}
+            activeOpacity={0.7}
+          />
+          <Text style={{fontSize:10, color: 'grey', marginLeft: 8}}>{data.company__name}</Text>
+          {article}
+        </View>
+        <Divider />
+        <View style={{flexDirection: 'row', marginTop: 8}}>
           <Text style={{width: '40%', color: 'grey'}}>Город</Text>
           <Text style={{width: '60%'}}>{data.city__name}</Text>
         </View>
@@ -247,14 +293,14 @@ class MyListItem extends React.PureComponent {
           <Text style={{width: '40%', color: 'grey'}}>Описание</Text>
           <Text style={{width: '60%'}}>{data.description}</Text>
         </View>
-        <View>
+        <View style={{marginBottom: 8}}>
           <Text style={{width: '40%', color: 'grey'}}>Требуются</Text>
           {jobComposition}
         </View>
         {button}
-        <View style={{flexDirection: 'row', borderTopColor: '#C4C4C4', marginTop: 8, borderTopWidth: 0.5, justifyContent: 'flex-end'}}>
-          <Text style={{fontSize:10, color: 'grey'}}>{data.company__name} | </Text>
-          <Text style={{fontSize:10, color: 'grey'}}>{data.created.substring(0,10)}</Text>
+        <Divider />
+        <View style={{justifyContent: 'flex-end', flex:1}}>
+          <Text style={{fontSize:10, color: 'grey', marginTop: 6}}>{data.created.substring(0,10)}</Text>
         </View>
       </View>
     );

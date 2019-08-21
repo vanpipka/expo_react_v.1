@@ -29,6 +29,8 @@ import DialogScreen from '../screens/DialogScreen';
 import Background from '../images/bg.png';
 import Utils from '../utils/Utils';
 import Urls from '../constants/Urls';
+import Colors from '../constants/Colors';
+import { Badge, Card } from 'react-native-elements';
 
 import { createStackNavigator, createSwitchNavigator, createAppContainer } from 'react-navigation';
 
@@ -238,7 +240,7 @@ class WorkerListScreen extends React.Component {
         let photoSource     = this.GetFotoURL(item['resizefotourl']);
         let name            = item['surname'] + ' ' + item['name'];
         let city            = item['city']['name'];
-        let isOnline        = item['isonline'] ? this.GetLabel(text='онлайн', color={backgroundColor:'#95CCA2'})  : null;
+        let isOnline        = item['isonline'] ? <Badge value = 'Онлайн' containerStyle={{ backgroundColor: Colors.blue}}/> : null;
         let experienceyear  = item['experienceyear'];
         let url             = item['url_json'];
         let dataCheck       = false;
@@ -254,14 +256,12 @@ class WorkerListScreen extends React.Component {
               if (item.name == 'datacheck') {
                   dataCheck = item['value'];
               }
-
-              color = item['value'] == true ? {backgroundColor:'#95CCA2'} : {backgroundColor:'#C4C4C4'}
-              return (<View style={{marginRight:8, marginTop:4}}key={item.name}>{this.GetLabel(item.label, color=color)}</View>);//<Text key={item.name}>{item.label}, </Text>)
+              return (<Badge key={item.name} value = {item.label} containerStyle={{ backgroundColor: item['value'] == true ? Colors.green : Colors.grey, marginTop: 4, marginRight: 4}}/>);
             });
         };
 
         if (dataCheck == true) {
-          dataCheckIcon = <Icon.Ionicons name={Platform.OS === 'ios' ? 'ios-checkmark-circle': 'md-checkmark-circle'} size={26} color={'#95CCA2'}/>
+          dataCheckIcon = <Icon.Ionicons name={Platform.OS === 'ios' ? 'ios-checkmark-circle': 'md-checkmark-circle'} size={26} color={Colors.green}/>
         }
 
         return (
@@ -274,7 +274,7 @@ class WorkerListScreen extends React.Component {
             </ImageBackground>
             <View style={{margin:8}}>
               <View style={{flexDirection: 'row'}}>
-                <Text style={{color:'#D21C43', fontWeight: 'bold', marginTop: 8, width: '80%'}}>{name}</Text>
+                <Text style={{color:'#D21C43', fontWeight: 'bold', marginTop: 8, width: '70%'}}>{name}</Text>
                 <View style={{flex: 1, alignItems: 'flex-end', marginTop:8,}}>
                   {isOnline}
                 </View>
@@ -326,17 +326,6 @@ class WorkerListScreen extends React.Component {
         });
     };
     return professions;
-  }
-
-  GetLabel(text, color){
-    return(
-      //, {justifyContent: 'center', alignItems: 'center', marginTop:8,}}>
-      <View style={[color]}>
-        <Text style = {{color: 'white', marginLeft: 4, marginRight: 4, textAlign: 'center'}}>
-          {text}
-        </Text>
-      </View>
-    )
   }
 
   GetFotoURL(url){
@@ -438,7 +427,7 @@ class WorkerInfoScreen extends React.Component {
         let photoSource     = this.GetFotoURL(item['resizefotourl']);
         let name            = item['surname'] + ' ' + item['name'];
         let city            = item['city']['name'];
-        let isOnline        = item['isonline'] ? this.GetLabel(text='онлайн', color={backgroundColor:'#95CCA2'})  : null;
+        let isOnline        = item['isonline'] ? <Badge value = 'Онлайн' containerStyle={{ backgroundColor: Colors.blue}}/> : null;
         let experienceyear  = item['experienceyear'];
         let dataCheck       = false;
         let dataCheckIcon   = null;
@@ -454,18 +443,15 @@ class WorkerInfoScreen extends React.Component {
 
         if (attributeslist != undefined) {
             attributes = attributeslist.map((item, index) => {
-
               if (item.name == 'datacheck') {
                   dataCheck = item['value'];
               }
-
-              color = item['value'] == true ? {backgroundColor:'#95CCA2'} : {backgroundColor:'#C4C4C4'}
-              return (<View style={{marginRight:8, marginTop:4}}key={item.name}>{this.GetLabel(item.label, color=color)}</View>);//<Text key={item.name}>{item.label}, </Text>)
+              return (<Badge key={item.name} value = {item.label} containerStyle={{ backgroundColor: item['value'] == true ? Colors.green : Colors.grey, marginTop: 4, marginRight: 4}}/>);
             });
         };
 
         if (dataCheck == true) {
-          dataCheckIcon = <Icon.Ionicons name={Platform.OS === 'ios' ? 'ios-checkmark-circle': 'md-checkmark-circle'} size={26} color={'#95CCA2'}/>
+          dataCheckIcon = <Icon.Ionicons name={Platform.OS === 'ios' ? 'ios-checkmark-circle': 'md-checkmark-circle'} size={26} color={Colors.green}/>
         }
 
         return (
@@ -488,7 +474,7 @@ class WorkerInfoScreen extends React.Component {
               </View>
               <View style={{margin:8, marginTop:0}}>
                 <View style={{flexDirection: 'row'}}>
-                  <Text style={{color:'#D21C43', fontWeight: 'bold', marginTop: 8, width: '80%'}}>{name}</Text>
+                  <Text style={{color:'#D21C43', fontWeight: 'bold', marginTop: 8, width: '70%'}}>{name}</Text>
                   <View style={{flex: 1, alignItems: 'flex-end', marginTop:8,}}>
                     {isOnline}
                   </View>
@@ -510,7 +496,7 @@ class WorkerInfoScreen extends React.Component {
             </View>
         )
       });
-      return <View>{list}</View>;
+      return <ScrollView>{list}</ScrollView>;
     } catch (e) {
         return(<ErrorPage/>);//
     }
@@ -530,7 +516,7 @@ class WorkerInfoScreen extends React.Component {
         return (
           <View key={item.id} style={{flexDirection: 'row',flexGrow: 1}}>
             <Text style={{}}>{item.service}</Text>
-            <View style={{marginLeft:4, marginRight:4, marginBottom:8, flexGrow: 1,borderBottomWidth:0.5, borderStyle: 'dotted', borderBottomColor: '#C4C4C4'}}/>
+            <View style={{marginLeft:4, marginRight:4, marginBottom:8, flexGrow: 1,borderBottomWidth:0.5, borderStyle: 'dotted', borderBottomColor: Colors.grey}}/>
             <Text>{item.price} р.</Text>
           </View>
         )
@@ -540,7 +526,7 @@ class WorkerInfoScreen extends React.Component {
               <Text style={{color: 'grey', flexGrow: 1}}>Услуги и цены</Text>
               <View key={'BYg87guu'} style={{flexDirection: 'row',flexGrow: 1}}>
                 <Text style={{}}>Полная занятость</Text>
-                <View style={{marginLeft:4, marginRight:4, marginBottom:8, flexGrow: 1,borderBottomWidth:0.5, borderStyle: 'dotted', borderBottomColor: '#C4C4C4'}}/>
+                <View style={{marginLeft:4, marginRight:4, marginBottom:8, flexGrow: 1,borderBottomWidth:0.5, borderStyle: 'dotted', borderBottomColor: Colors.grey}}/>
                 <Text>{salary} р.</Text>
               </View>
               {professions}
@@ -583,17 +569,6 @@ class WorkerInfoScreen extends React.Component {
         });
     };
     return professions;
-  }
-
-  GetLabel(text, color){
-    return(
-      //, {justifyContent: 'center', alignItems: 'center', marginTop:8,}}>
-      <View style={[color]}>
-        <Text style = {{color: 'white', marginLeft: 4, marginRight: 4, textAlign: 'center'}}>
-          {text}
-        </Text>
-      </View>
-    )
   }
 
   GetFotoURL(url){
@@ -660,7 +635,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     paddingTop: 10,
     height: 40,
-    color: '#C4C4C4',
+    color: Colors.grey,
     borderColor: 'gray',
     borderWidth: 1,
     margin: 8,
