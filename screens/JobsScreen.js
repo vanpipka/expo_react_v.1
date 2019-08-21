@@ -299,7 +299,7 @@ class MyListItem extends React.PureComponent {
         </View>
         {button}
         <Divider />
-        <View style={{justifyContent: 'flex-end', flex:1}}>
+        <View style={{alignItems: 'flex-end', flex:1}}>
           <Text style={{fontSize:10, color: 'grey', marginTop: 6}}>{data.created.substring(0,10)}</Text>
         </View>
       </View>
