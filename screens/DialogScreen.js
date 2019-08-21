@@ -36,9 +36,12 @@ class LogoTitle extends React.Component {
   render() {
     return (
       <View style={{flexDirection: 'row'}}>
-        <Image
-          source={{uri: this.props.recipient.url}}
-          style={{ width: 30, height: 30 }}
+        <Avatar
+          size={20}
+          rounded
+          source={{ uri: this.props.recipient.url }}
+          onPress={() => console.log("Works!")}
+          activeOpacity={0.7}
         />
         <Text style={{ fontWeight: 'bold', fontSize: 20, paddingLeft: 8 }}>
           {this.props.recipient.name}

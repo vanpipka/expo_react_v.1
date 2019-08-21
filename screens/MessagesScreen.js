@@ -46,16 +46,18 @@ class MyListItem extends React.PureComponent {
         onPress={this._onPress}>
         <View style={{flexDirection: 'row'}}>
           <View style={{width: '30%', alignItems: 'center', padding: 8}}>
-            <ImageBackground style={{width: '100%',}} source={photo} resizeMode='contain'>
-              <View style={{width: '100%', height: 100}}>
-
-              </View>
-            </ImageBackground>
+            <Avatar
+              size={50}
+              rounded
+              source={{ uri: data.sender.foto }}
+              onPress={() => console.log("Works!")}
+              activeOpacity={0.7}
+            />
           </View>
-          <View style={{width: '70%'}}>
+          <View style={{width: '70%', height: 75}}>
             <View style={{flexDirection: 'row'}}>
               <Text style={{width: '70%', color: '#D21C43',  fontWeight: 'bold'}}>{data.sender.name}</Text>
-              <Text style={{width: '30%', fontSize: 8}}>{data.lastMessage.date}</Text>
+              <Text style={{width: '30%', fontSize: 8, marginTop: 2}}>{data.lastMessage.date}</Text>
             </View>
             <Text style={{color: 'grey'}}>{data.lastMessage.text}</Text>
           </View>
