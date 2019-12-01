@@ -9,8 +9,9 @@ import {
   TextInput,
   FlatList,
   Alert,
+  KeyboardAvoidingView,
 } from 'react-native';
-
+import { Badge} from 'react-native-elements'
 import LoadingPage from '../screens/LoadingPage';
 import ErrorPage from '../screens/ErrorPage';
 import Urls from '../constants/Urls';
@@ -27,10 +28,11 @@ class MyListItem extends React.PureComponent {
     return (
       <View style={{ borderBottomWidth:1, borderBottomColor: '#C4C4C4'}}>
         <TouchableOpacity onPress={this._onPress} style={{margin:8}}>
-          <View style={{height: 40, justifyContent: 'center', }}>
-            <Text style={{  }}>
+          <View style={{height: 40, alignItems: 'center', justifyContent: 'center',  flexDirection: 'row'}}>
+            <Text style={{ width: '90%' }}>
               {this.props.title}
             </Text>
+            {this.props.id == this.props.query_id ? <View style={{ width: 20, height: 20, borderRadius: 50, backgroundColor: '#D21C43'}}><Text style={{color: '#D21C43'}}>.</Text></View> : null }
           </View>
         </TouchableOpacity>
       </View>
@@ -61,7 +63,7 @@ export default class LinksScreen extends React.Component {
   };
 
   _loadCityAsync = async () => {
-    
+
       let data = '';
       try {
         let response = await fetch(API);
@@ -85,6 +87,7 @@ export default class LinksScreen extends React.Component {
         id = {item.id}
         onPressItem={this._onPressItem}
         title={item.title}
+        query_id={this.state.query_id}
       />
     );
 
@@ -112,6 +115,7 @@ export default class LinksScreen extends React.Component {
     const citys = this.findCity(query);
 
     return (
+        <KeyboardAvoidingView style={{flex: 1}} behavior="padding"  keyboardVerticalOffset={80} enabled>
           <View style={styles.container}>
             <View style = {{backgroundColor:'grey', padding: 8}}>
               <TextInput
@@ -130,9 +134,10 @@ export default class LinksScreen extends React.Component {
             <TouchableOpacity style={styles.redSection} onPress={() => {
                                             navigation.state.params.onGoBack({'name': this.state.query, 'id': this.state.query_id})
                                             navigation.goBack()}}>
-              <Text style={{color: 'white'}}>Продолжить</Text>
+              <Text style={{color: 'white'}}>Сохранить</Text>
             </TouchableOpacity>
           </View>
+        </KeyboardAvoidingView>
     );
   }
 }

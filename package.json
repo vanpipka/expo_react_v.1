@@ -14,6 +14,8 @@
   "dependencies": {
     "@expo/samples": "2.1.1",
     "expo": "^33.0.0",
+    "expo-camera": "~5.0.1",
+    "expo-file-system": "~5.0.1",
     "expo-image-picker": "~5.0.2",
     "moment": "^2.24.0",
     "react": "16.8.3",
@@ -25,6 +27,7 @@
     "react-native-image-picker": "^1.0.1",
     "react-native-rating": "^2.0.4",
     "react-native-ratings": "^6.3.0",
+    "react-native-select-input-ios": "^2.0.2",
     "react-native-star-rating": "^1.1.0",
     "react-navigation": "^3.0.9"
   },

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet, Text } from 'react-native';
 import { createStackNavigator, createBottomTabNavigator } from 'react-navigation';
 
 import TabBarIcon from '../components/TabBarIcon';
@@ -20,7 +20,7 @@ HomeStack.navigationOptions = {
       focused={focused}
       name={
         Platform.OS === 'ios'
-          ? `ios-contacts${focused ? '' : '-outline'}`
+          ? 'ios-contacts'
           : 'md-contacts'
       }
     />
@@ -29,7 +29,8 @@ HomeStack.navigationOptions = {
 
 const JobsStack = createStackNavigator({
   Jobs: JobsScreen,
-},{headerMode: 'none'});
+},{headerMode: 'none'},
+);
 
 JobsStack.navigationOptions = {
   tabBarLabel: 'Заказы',

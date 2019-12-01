@@ -9,6 +9,7 @@ import {
   TextInput,
   FlatList,
   Alert,
+  KeyboardAvoidingView,
 } from 'react-native';
 
 import LoadingPage from '../screens/LoadingPage';
@@ -121,6 +122,7 @@ export default class LinksScreen extends React.Component {
     const citys = this.findCity(query);
 
     return (
+      <KeyboardAvoidingView style={{flex: 1}} behavior="padding"  keyboardVerticalOffset={80} enabled>
           <View style={styles.container}>
             <View style = {{backgroundColor:'grey', padding: 8}}>
               <TextInput
@@ -142,6 +144,7 @@ export default class LinksScreen extends React.Component {
               <Text style={{color: 'white'}}>Продолжить</Text>
             </TouchableOpacity>
           </View>
+      </KeyboardAvoidingView>
     );
   }
 }

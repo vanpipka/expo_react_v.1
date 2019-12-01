@@ -25,6 +25,7 @@ import ErrorPage from '../screens/ErrorPage';
 import CompanysPage from '../screens/CompanyList';
 import DialogScreen from '../screens/DialogScreen';
 import Urls from '../constants/Urls';
+import Colors from '../constants/Colors';
 
 import { createStackNavigator, createSwitchNavigator, createAppContainer } from 'react-navigation';
 
@@ -114,7 +115,7 @@ export class MessagesScreen extends React.Component {
     let dataJSON  = await GetQueryResult({method: 'GET', url: DIALOG_LIST_URL});
 
     if (dataJSON['status'] === true) {
-      this.setState({data:  dataJSON['dataset'], refreshing: false, text: JSON.stringify(dataJSON)});
+      this.setState({data:  dataJSON['dataset'], refreshing: false, text: JSON.stringify(dataJSON), errors: ''});
     }else{
       this.setState({errors: dataJSON['errors'], refreshing: false, text: JSON.stringify(dataJSON)});
     };
@@ -128,10 +129,18 @@ export class MessagesScreen extends React.Component {
       />
     );
 
+  _willFocus = ({item}) => {
+      this._loadAsync();
+  };
+
+  _goAuthLoginStack = ({item}) => {
+    this.props.navigation.navigate('AuthLoginStack', );
+  };
+
   render() {
 
     if (this.state.errors.length != 0) {
-      return (<ErrorPage mistake={this.state.errors}/>);
+      return (<ErrorPage mistake={this.state.errors} willFocus={this._willFocus} goAuthLoginStack={this._goAuthLoginStack}/>);
     }
 
     return (
@@ -176,7 +185,21 @@ class AuthLoadingScreen extends React.Component {
     );
   }
 }
-const AppStack = createStackNavigator({ Home: MessagesScreen, CompanyList: CompanysPage, Dialog: DialogScreen});
+const AppStack = createStackNavigator(
+          { Home: MessagesScreen, CompanyList: CompanysPage, Dialog: DialogScreen},
+          {
+            initialRouteName: 'Home',
+            defaultNavigationOptions: {
+                  headerStyle: {
+                    backgroundColor: Colors.mainColor,
+                  },
+                  headerTintColor: '#fff',
+                  //headerTitleStyle: {
+                  //  fontWeight: 'bold',
+                  //},
+                },
+          },
+);
 
 export default createAppContainer(createSwitchNavigator(
   {

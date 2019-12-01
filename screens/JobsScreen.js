@@ -17,11 +17,12 @@ import { GetQueryResult } from '../components/WebAPI';
 import { Icon, Overlay, Button, Badge, Avatar, Divider } from 'react-native-elements';
 import LoadingPage from '../screens/LoadingPage';
 import ErrorPage from '../screens/ErrorPage';
+import AuthLoginScreen from '../screens/AuthLoginScreen';
 import Urls from '../constants/Urls';
 import Colors from '../constants/Colors';
 import Autocomplete from '../components/Autocomplete';
 
-import { createStackNavigator, createSwitchNavigator, createAppContainer } from 'react-navigation';
+import { createStackNavigator, createSwitchNavigator, createAppContainer, NavigationEvents } from 'react-navigation';
 
 const JOB_LIST_URL  = Urls.SERVER_URL+Urls.JOB_LIST_URL;
 const JOB_SAVE_URL  = Urls.SERVER_URL+Urls.JOB_SAVE_URL;
@@ -85,10 +86,10 @@ export class JobsScreen extends React.Component {
     this.setState({refreshing: true});
     let dataJSON  = await GetQueryResult({method: 'GET', url: JOB_LIST_URL});
 
-    //console.log(JSON.stringify(dataJSON));
+    console.log(JSON.stringify(dataJSON));
 
     if (dataJSON['status'] === true) {
-      this.setState({data:  dataJSON['dataset'], refreshing: false});
+      this.setState({data:  dataJSON['dataset'], refreshing: false, errors: ''});
     }else{
       this.setState({errors: dataJSON['errors'], refreshing: false});
     };
@@ -124,10 +125,18 @@ export class JobsScreen extends React.Component {
 
     }
 
+  _willFocus = ({item}) => {
+    this._loadAsync();
+  };
+
+  _goAuthLoginStack = ({item}) => {
+    this.props.navigation.navigate('AuthLoginStack', );
+  };
+
   render() {
 
     if (this.state.errors.length != 0) {
-      return (<ErrorPage mistake={this.state.errors}/>);
+      return (<ErrorPage mistake={this.state.errors} willFocus={this._willFocus} goAuthLoginStack={this._goAuthLoginStack}/>);
     }
 
     const { navigation } = this.props;
@@ -231,14 +240,12 @@ class MyListItem extends React.PureComponent {
 
   render() {
 
-
-
     let data = this.props.data;
     let button = null;
     let article = null;
     let jobComposition = null;
 
-    console.log(data);
+    //console.log(data);
 
     if (data.job_composition.length == 0) {
       jobComposition = <View  style={{marginLeft: 8, marginRight: 8}}>
@@ -307,7 +314,19 @@ class MyListItem extends React.PureComponent {
   }
 }
 
-const AppStack = createStackNavigator({ Home: JobsScreen,});
+const AppStack = createStackNavigator({ Home: JobsScreen, Auth: AuthLoginScreen},
+                              {
+                                initialRouteName: 'Home',
+                                defaultNavigationOptions: {
+                                      headerStyle: {
+                                        backgroundColor: Colors.mainColor,
+                                      },
+                                      headerTintColor: '#fff',
+                                      //headerTitleStyle: {
+                                      //  fontWeight: 'bold',
+                                      //},
+                                    },
+                              },);
 
 export default createAppContainer(createSwitchNavigator(
   {
@@ -316,6 +335,15 @@ export default createAppContainer(createSwitchNavigator(
   },
   {
     initialRouteName: 'AuthLoading',
+    defaultNavigationOptions: {
+          headerStyle: {
+            backgroundColor: Colors.mainColor,
+          },
+          headerTintColor: '#fff',
+          //headerTitleStyle: {
+          //  fontWeight: 'bold',
+          //},
+        },
   }
 ));
 

@@ -15,20 +15,24 @@ import {
   Image,
   ScrollView,
   DatePickerAndroid,
-  Picker,
   KeyboardAvoidingView,
   SafeAreaView,
+  CameraRoll,
 } from 'react-native';
-
+import * as FileSystem from 'expo-file-system';
+import { Camera } from 'expo-camera';
+import { Permissions, Icon } from 'expo';
 import {GetQueryResult} from '../components/WebAPI';
 import StarRating from '../components/Rating';
 import LoadingPage from '../screens/LoadingPage';
 import ErrorPage from '../screens/ErrorPage';
 import Urls from '../constants/Urls';
+import Colors from '../constants/Colors';
 import * as ImagePicker from 'expo-image-picker';
 import { CheckBox, ButtonGroup } from 'react-native-elements';
 import DatePicker from 'react-native-datepicker';
-
+import SelectInput from 'react-native-select-input-ios';
+import { createStackNavigator, createSwitchNavigator, createAppContainer } from 'react-navigation';
 class LogoTitle extends React.Component {
   render() {
     return (
@@ -49,9 +53,9 @@ class LogoTitle extends React.Component {
 
 }
 
-export default class SettingsScreen extends React.Component {
+export class SettingsScreen extends React.Component {
   static navigationOptions = {
-    title: 'Профиль',
+    header: null,
   };
 
   constructor(props) {
@@ -65,44 +69,37 @@ export default class SettingsScreen extends React.Component {
 
   }
 
-  componentDidMount() {
-    this.getPermissionAsync();
+  async componentDidMount() {
     this._bootstrapAsync();
   }
 
-  getPermissionAsync = async () => {
-    if (Platform.OS === 'ios') {
-      const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
-      if (status !== 'granted') {
-        alert('Sorry, we need camera roll permissions to make this work!');
-      }
-    }
+  async savePhoto(base64Image) {
+    const SAVESETTINGS_URL = Urls.SERVER_URL+Urls.SAVESETTINGS_URL;
+    let bodyData = {fotourl: base64Image};
+
+    let body = encodeURIComponent('csrfmiddlewaretoken') + '=' + await AsyncStorage.getItem('csrfmiddlewaretoken')
+                    +"&"+ encodeURIComponent('data') + '=' + encodeURIComponent(JSON.stringify(bodyData));
+        //{limit: '50mb'}
+    let dataJSON  = await GetQueryResult({method: 'POST', url: SAVESETTINGS_URL, body: body});
+
   }
 
+  _refreshPhoto = (data)=> {
+    console.log("ПолучилиФото");
+    console.log(data);
+
+    let base64Image = data.photo.base64;
+    this.setState({dataisloading: false,});
+
+    this.savePhoto(base64Image) ;
+
+    this.setState({dataisloading: true, image: data.photo.uri});
+
+    };
+
   _pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality : 1,
-      aspect: [4, 4],
-      base64: true,
-    });
-
-    //console.log(result)
-
-    if (!result.cancelled) {
-
-      this.setState({dataisloading: false,});
-
-      const SAVESETTINGS_URL = Urls.SERVER_URL+Urls.SAVESETTINGS_URL;
-      let bodyData = {fotourl: result.base64};
-
-      let body = encodeURIComponent('csrfmiddlewaretoken') + '=' + await AsyncStorage.getItem('csrfmiddlewaretoken')
-                  +"&"+ encodeURIComponent('data') + '=' + encodeURIComponent(JSON.stringify(bodyData));
-
-      let dataJSON  = await GetQueryResult({method: 'POST', url: SAVESETTINGS_URL, body: body});
-
-      this.setState({dataisloading: true, image: result.uri});
-    }
+    this.props.navigation.navigate('Photo', {onGoBack: this._refreshPhoto})
+    console.log('че там дальше5');
   };
 
   render() {
@@ -121,7 +118,7 @@ export default class SettingsScreen extends React.Component {
 
     let settingsView = this.GetSettingsView();
 
-    if (Platform.OS === 'android') {
+    //if (Platform.OS === 'android') {
        return(
          <KeyboardAvoidingView style={{flex: 1}} behavior="padding"  keyboardVerticalOffset={80} enabled>
            <View style={styles.container}>
@@ -139,32 +136,6 @@ export default class SettingsScreen extends React.Component {
            </View>
         </KeyboardAvoidingView>
         );
-      } else {
-        return(
-          <SafeAreaView style={{flex: 1}}>
-            <View style={styles.container}>
-               <ScrollView
-                 refreshControl={
-                   <RefreshControl
-                     refreshing={this.state.refreshing}
-                     onRefresh={this._bootstrapAsync}
-                   />
-                 }
-                >
-                 <TouchableOpacity onPress={this._exitAsync} style={styles.greySection}>
-                   <Text style={{color: 'grey', marginRight: 8, marginTop: -4}}>Выйти</Text>
-                 </TouchableOpacity>
-                 <View style={{padding: 8}}>
-                   {settingsView}
-                 </View>
-               </ScrollView>
-               <TouchableOpacity onPress={this._saveAsync} style={styles.redSection}>
-                 <Text style={{color: 'white', marginRight: 8, marginTop: -4}}>СОХРАНИТЬ</Text>
-               </TouchableOpacity>
-            </View>
-         </SafeAreaView>
-       );
-      };
   }
 
   GetSettingsView(){
@@ -306,23 +277,38 @@ export default class SettingsScreen extends React.Component {
       }
       else if (item.type === 'year') {
 
-          let itemList = this.GetSelectList(item['min'], item['max']);
-
-          return (
-            <View key = {index} style={{flexDirection: 'row'}}>
-              <Text style={[styles.greylabel,{marginTop: 12}]}>{item.label}</Text>
-
-              <View style={[styles.textInput]}>
-                <Picker
-                  selectedValue={String(this.state[item.columnname])}
-                  prompt = {item.label}
-                  style={{ width: '100%', marginTop:-6, marginLeft:-6 }}
-                  onValueChange={(itemValue, itemIndex) => this.SetValue(itemValue, item.columnname)}>
-                  {itemList}
-                  </Picker>
+          if (Platform.OS === 'ios') {
+            return (
+              <View key = {index} style={{flexDirection: 'row'}}>
+                <Text style={[styles.greylabel,{marginTop: 12}]}>{item.label}</Text>
+                <View style={[styles.textInput]}>
+                  <SelectInput
+                    value={String(this.state[item.columnname])}
+                    options={this.GetSelectList(item['min'], item['max'])}
+                    onCancelEditing={() => console.log('onCancel')}
+                    onSubmitEditing={(value) => this.SetValue(value, item.columnname)}
+                    style={{ width: '100%', paddingTop: 12}}
+                  />
                 </View>
-            </View>
-          )
+              </View>
+            )
+          }
+          else {
+            return (
+              <View key = {index} style={{flexDirection: 'row'}}>
+                <Text style={[styles.greylabel,{marginTop: 12}]}>{item.label}</Text>
+                <View style={[styles.textInput]}>
+                  <SelectInput
+                    value={String(this.state[item.columnname])}
+                    options={this.GetSelectList(item['min'], item['max'])}
+                    onCancelEditing={() => console.log('onCancel')}
+                    onSubmitEditing={(value) => this.SetValue(value, item.columnname)}
+                    style={{ width: '100%', marginTop: -4, }}
+                  />
+                </View>
+              </View>
+            )
+          }
       }
       else if (item.type === 'text') {
           return (
@@ -508,7 +494,7 @@ export default class SettingsScreen extends React.Component {
     let count = Number(max) - y;
 
     for (i = 0; i <= count; i++){
-      itemlist.push(<Picker.Item key = {i} label={String(y+i)} value={String(y+i)} />);
+      itemlist.push({label: String(y+i), value: String(y+i)});
     };
 
     return (itemlist);
@@ -648,6 +634,133 @@ export default class SettingsScreen extends React.Component {
 
 };
 
+export class CameraExample extends React.Component {
+
+  static navigationOptions = {
+    header: null,
+  };
+
+  state = {
+    hasCameraPermission: null,
+    type: Camera.Constants.Type.back,
+  };
+
+  async componentDidMount() {
+    const { status } = await Permissions.askAsync(Permissions.CAMERA);
+    this.setState({ hasCameraPermission: status === 'granted' });
+  }
+
+  snap = async () => {
+    if (this.camera) {
+      let photo = await this.camera.takePictureAsync({"quality": 0.1, "base64": true});
+
+      this.props.navigation.state.params.onGoBack({'photo': photo})
+      this.props.navigation.goBack()
+
+    }
+  };
+
+  render() {
+    const { hasCameraPermission } = this.state;
+    if (hasCameraPermission === null) {
+      return <View />;
+    } else if (hasCameraPermission === false) {
+      return <Text>No access to camera</Text>;
+    } else {
+      return (
+        <View style={{ flex: 1 }}>
+          <Camera
+              style={{ flex: 1 }}
+              type={this.state.type}
+              ref={ref => {this.camera = ref;}}>
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: 'transparent',
+                flexDirection: 'row',
+              }}>
+              <TouchableOpacity
+                style={{
+                  flex: 0.2,
+                  alignSelf: 'flex-end',
+                  alignItems: 'center',
+                  margin: 8,
+                }}
+                onPress={() => {
+                  this.setState({
+                    type:
+                      this.state.type === Camera.Constants.Type.back
+                        ? Camera.Constants.Type.front
+                        : Camera.Constants.Type.back,
+                  });
+                }}>
+                <Icon.Ionicons
+                  size={40}
+                  name={'md-reverse-camera'}
+                  color={'white'}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  flex: 0.6,
+                  alignSelf: 'flex-end',
+                  alignItems: 'center',
+                  margin: 8,
+                }}
+                onPress={this.snap}>
+                <Icon.Ionicons
+                  size={60}
+                  name={'md-camera'}
+                  color={'white'}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  flex: 0.2,
+                  alignSelf: 'flex-end',
+                  alignItems: 'center',
+                  margin: 8,
+                }}>
+              </TouchableOpacity>
+            </View>
+          </Camera>
+        </View>
+      );
+    }
+  }
+}
+
+const AppStack = createStackNavigator({ Home: SettingsScreen, Photo: CameraExample},
+                                        {
+                                          initialRouteName: 'Home',
+                                          defaultNavigationOptions: {
+                                                headerStyle: {
+                                                  backgroundColor: Colors.mainColor,
+                                                },
+                                                headerTintColor: '#fff',
+                                                //headerTitleStyle: {
+                                                //  fontWeight: 'bold',
+                                                //},
+
+                                              },
+                                              navigationOptions: {
+                                            tabBarLabel: 'Настройки',
+                                          },
+                                        },);
+
+const AuthStack = createStackNavigator({ Home: SettingsScreen, Photo: CameraExample,});
+
+export default createAppContainer(createSwitchNavigator(
+  {
+    AuthLoading: SettingsScreen,
+    App: AppStack,
+    Auth: AuthStack,
+  },
+  {
+    initialRouteName: 'AuthLoading',
+  }
+));
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -716,4 +829,13 @@ const styles = StyleSheet.create({
     marginTop:8,
     color: 'grey',
   },
+
+  selectInput: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: 'black',
+    marginTop: 8,
+    overflow: 'hidden'
+  },
+
 });

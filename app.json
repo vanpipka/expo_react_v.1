@@ -10,7 +10,7 @@
       "ios",
       "android"
     ],
-    "version": "2.0.0",
+    "version": "4.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "primaryColor": "#D21C43",
@@ -26,12 +26,25 @@
       "assets/*"
     ],
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.vseexpo.app"
+      "supportsTablet": false,
+      "bundleIdentifier": "com.vseexpo.app",
+      "buildNumber": "1.00.7",
+      "infoPlist": {
+        "NSCameraUsageDescription":
+          "Приложению требуется доступ к вашей камере, чтобы сделать фото вашего профиля",
+        "NSPhotoLibraryUsageDescription":
+          "Приложению требуется доступ к вашим фотографиям, чтобы выбрать фото вашего профиля"
+      }
     },
     "android": {
       "package": "com.vseexpo.app",
-      "versionCode": 8
+      "versionCode": 13,
+      "permissions": [
+        "CAMERA",
+        "MANAGE_DOCUMENTS",
+        "READ_EXTERNAL_STORAGE",
+        "READ_PHONE_STATE"
+      ]
     }
   }
 }

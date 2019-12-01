@@ -14,6 +14,7 @@ export default {
   MESSAGES_LIST_URL: '/messages/',
   PROFESSIONANDGROUPS_URL: '/m/professionandgroups/',
   LOGIN_URL: '/accounts/login/',
+  RESET_PASS_URL: '/accounts/reset/',
   REGISTER_URL: '/accounts/signup/',
   TEST_URL: 'https://vseexpo.ru/worker/testcsrf/',
   SETTINGS_URL: '/worker/m/settings/',

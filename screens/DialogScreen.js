@@ -26,6 +26,7 @@ import LoadingPage from '../screens/LoadingPage';
 import ErrorPage from '../screens/ErrorPage';
 import CompanysPage from '../screens/CompanyList';
 import Urls from '../constants/Urls';
+import Colors from '../constants/Colors';
 
 import { createStackNavigator, createSwitchNavigator, createAppContainer } from 'react-navigation';
 
@@ -43,7 +44,7 @@ class LogoTitle extends React.Component {
           onPress={() => console.log("Works!")}
           activeOpacity={0.7}
         />
-        <Text style={{ fontWeight: 'bold', fontSize: 20, paddingLeft: 8 }}>
+        <Text style={{color: 'white', fontWeight: 'bold', fontSize: 20, paddingLeft: 8 }}>
           {this.props.recipient.name}
         </Text>
       </View>
@@ -75,9 +76,17 @@ export default class MessagesScreen extends React.Component {
 
   static navigationOptions = ({ navigation, navigationOptions }) => {
     const { params } = navigation.state;
-    return {
-          headerTitle: <LogoTitle recipient = {params.recipient}/>
-        };
+
+    if (!params.fromWorkerList || Platform.OS === 'android') {
+      return {
+            //title: 'Назад',
+            headerTitle: <LogoTitle recipient = {params.recipient}/>
+          };
+    }else{
+      return {
+            title: params.recipient.name,
+          };
+    };
   };
 
   constructor(props) {

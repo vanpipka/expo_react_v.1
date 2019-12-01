@@ -11,6 +11,7 @@ import {
   TextInput,
   FlatList,
   Alert,
+  KeyboardAvoidingView,
 } from 'react-native';
 
 import LoadingPage from '../screens/LoadingPage';
@@ -159,6 +160,7 @@ export default class LinksScreen extends React.Component {
     const { navigation } = this.props;
 
     return (
+      <KeyboardAvoidingView style={{flex: 1}} behavior="padding"  keyboardVerticalOffset={80} enabled>
           <View style={styles.container}>
             <View style={{backgroundColor: '#D1ECF1', padding: 8, borderBottomWidth:1, borderBottomColor: '#C4C4C4'}}>
                 <Text style={{color: '#0C5460'}}>Введите часовую ставку в рублях по указанным услугам что бы работодатель мог быстрее найти вас в поиске</Text>
@@ -170,9 +172,10 @@ export default class LinksScreen extends React.Component {
               renderItem={this._renderItem}
             />
             <TouchableOpacity style={styles.redSection} onPress={this._saveServicesAsync}>
-              <Text style={{color: 'white'}}>ПРОДОЛЖИТЬ</Text>
+              <Text style={{color: 'white'}}>СОХРАНИТЬ</Text>
             </TouchableOpacity>
           </View>
+        </KeyboardAvoidingView>
     );
   }
 }

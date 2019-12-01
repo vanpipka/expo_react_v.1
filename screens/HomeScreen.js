@@ -587,7 +587,7 @@ class WorkerInfoScreen extends React.Component {
     let data  = await GetQueryResult({method: 'GET', url: URI});
     if (data.status === true) {
 
-        this.props.navigation.navigate("Dialog", {id: data.dialog.id, recipient: {name: data.dialog.sender.name, url: data.dialog.sender.foto}});
+        this.props.navigation.navigate("Dialog", {fromWorkerList: true, id: data.dialog.id, recipient: {name: data.dialog.sender.name, url: data.dialog.sender.foto}});
     }
     else{
         //Alert.alert(data.errors);
@@ -613,7 +613,19 @@ const AuthStack = createStackNavigator({  Main: MainPageScreen,
                                           SelectProfessionPage:  ProfessionsScreen,
                                           SearchParametersPage: SearchParametersScreen,
                                           Dialog: DialogScreen,
-                                        });
+                                        },
+                                        {
+                                          initialRouteName: 'Main',
+                                          defaultNavigationOptions: {
+                                                headerStyle: {
+                                                  backgroundColor: Colors.mainColor,
+                                                },
+                                                headerTintColor: '#fff',
+                                                //headerTitleStyle: {
+                                                //  fontWeight: 'bold',
+                                                //},
+                                              },
+                                        },);
 
 export default createAppContainer(createSwitchNavigator(
   {

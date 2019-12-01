@@ -60,23 +60,19 @@ _getTokenAsync = async (props) => {
     else{
         response  = await fetch(props.url, {method: 'POST', body: props.body, headers: headers});
     }
-
     let data      = await response.text();
     let dataJSON  = {};
-
     if (Platform.OS === 'android') {
       data = data.replace(/\r?\n/g, '').replace(/[\u0080-\uFFFF]/g, '');
     };
-
     try {
       dataJSON = JSON.parse(data);
       _setSessionInfo(dataJSON);
     } catch (e) {
       //не обрабатываем
-      console.log('Ответ сервера: '+data)
+      //console.log('Ответ сервера: '+data)
       Alert.alert('Ошибка')
-    }
-
+    };
     return dataJSON
 }
 
