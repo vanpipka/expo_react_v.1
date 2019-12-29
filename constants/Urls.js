@@ -12,6 +12,7 @@ export default {
   JOB_LIST_URL: '/jobs/',
   JOB_SAVE_URL: '/jobs/save/',
   MESSAGES_LIST_URL: '/messages/',
+  RESPONSES_LIST_URL: '/responses/',
   PROFESSIONANDGROUPS_URL: '/m/professionandgroups/',
   LOGIN_URL: '/accounts/login/',
   RESET_PASS_URL: '/accounts/reset/',
@@ -23,5 +24,5 @@ export default {
   COMPANY_LIST_URL: '/companys/',
   DIALOG_LIST_URL: '/dialogs/',
   CHECK_LOGIN_URL: '/m/checklogin/',
-  MESSAGE_SEND_URL: '/messages/send/',
+  MESSAGE_SEND_URL: '/messages/send/'
 };

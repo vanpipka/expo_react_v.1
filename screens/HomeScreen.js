@@ -49,6 +49,10 @@ class AuthLoadingScreen extends React.Component {
     this.props.navigation.navigate('Main', {data: JSON.stringify(data)});
   };
 
+  componentDidMount() {
+    console.log("componentDidMount");
+  }
+
   // Render any loading content that you like here
   render() {
 

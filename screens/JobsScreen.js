@@ -14,7 +14,8 @@ import {
   RefreshControl,
 } from 'react-native';
 import { GetQueryResult } from '../components/WebAPI';
-import { Icon, Overlay, Button, Badge, Avatar, Divider } from 'react-native-elements';
+import { Icon, Overlay, Button, Badge, Divider } from 'react-native-elements';
+import { Avatar } from 'react-native-paper';
 import LoadingPage from '../screens/LoadingPage';
 import ErrorPage from '../screens/ErrorPage';
 import AuthLoginScreen from '../screens/AuthLoginScreen';
@@ -277,13 +278,7 @@ class MyListItem extends React.PureComponent {
     return (
       <View style={{borderWidth:0.5, borderColor: Colors.grey, padding: 8, margin:8}}>
         <View style = {{flexDirection: 'row', alignItems: 'center', marginBottom: 8}}>
-          <Avatar
-            size={35}
-            rounded
-            source={{ uri: data.photo }}
-            onPress={() => console.log("Works!")}
-            activeOpacity={0.7}
-          />
+          <Avatar.Image size={35} source={{ uri: data.photo }} />
           <Text style={{fontSize:10, color: 'grey', marginLeft: 8}}>{data.company__name}</Text>
           {article}
         </View>

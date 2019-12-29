@@ -19,7 +19,8 @@ import {
 
 import { GetQueryResult } from '../components/WebAPI';
 import { GiftedChat } from 'react-native-gifted-chat';
-import { Icon, Avatar } from 'react-native-elements';
+import { Icon } from 'react-native-elements';
+import { Avatar } from 'react-native-paper';
 import LoadingPage from '../screens/LoadingPage';
 import ErrorPage from '../screens/ErrorPage';
 import CompanysPage from '../screens/CompanyList';
@@ -47,13 +48,7 @@ class MyListItem extends React.PureComponent {
         onPress={this._onPress}>
         <View style={{flexDirection: 'row'}}>
           <View style={{width: '30%', alignItems: 'center', padding: 8}}>
-            <Avatar
-              size={50}
-              rounded
-              source={{ uri: data.sender.foto }}
-              onPress={() => console.log("Works!")}
-              activeOpacity={0.7}
-            />
+            <Avatar.Image size={50} source={{ uri: data.sender.foto }} />
           </View>
           <View style={{width: '70%', height: 75}}>
             <View style={{flexDirection: 'row'}}>

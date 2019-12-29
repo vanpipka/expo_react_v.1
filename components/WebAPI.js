@@ -93,3 +93,40 @@ _setSessionInfo = async (dataJSON) => {
   };
 
 }
+
+export function GetMessageCount(url) {
+  
+    const makeRequest = async () => {
+        console.log(await _getMessageCountAsync({url: url}));
+        return "done"
+    };
+    let count = 0;
+    makeRequest().then((result) => {
+      count = 3;
+    })
+    console.log("хуй"+ count);
+    return count;
+
+    let jsondata  = _getMessageCountAsync({url: url});
+
+
+    try {
+      if (jsondata['count'] != undefined){
+        count = jsondata['count']
+      };
+
+    } catch (e) {
+      //не обрабатываем
+      console.log('Ответ сервера: '+jsondata)
+    };
+
+    return count
+}
+
+_getMessageCountAsync = async (props) => {
+
+    let data  = await GetQueryResult({method: 'GET', url: props.url});
+
+    return data
+
+}

@@ -21,7 +21,8 @@ import {
 } from 'react-native';
 
 import { GetQueryResult } from '../components/WebAPI';
-import { Icon, Avatar } from 'react-native-elements';
+import { Icon } from 'react-native-elements';
+import { Avatar } from 'react-native-paper';
 import LoadingPage from '../screens/LoadingPage';
 import ErrorPage from '../screens/ErrorPage';
 import CompanysPage from '../screens/CompanyList';
@@ -37,13 +38,7 @@ class LogoTitle extends React.Component {
   render() {
     return (
       <View style={{flexDirection: 'row', alignItems: 'center'}}>
-        <Avatar
-          size={30}
-          rounded
-          source={{ uri: this.props.recipient.url }}
-          onPress={() => console.log("Works!")}
-          activeOpacity={0.7}
-        />
+        <Avatar.Image size={30} source={{ uri: this.props.recipient.url }} />
         <Text style={{color: 'white', fontWeight: 'bold', fontSize: 20, paddingLeft: 8 }}>
           {this.props.recipient.name}
         </Text>
